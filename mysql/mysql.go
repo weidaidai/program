@@ -89,17 +89,18 @@ func insertrow() {
 //更新
 func updaterow() {
 	sql_syntax := "update user set name=? where id=?"
-	result, err := db.Exec(sql_syntax, "小可爱", 1)
+	result, err := db.Exec(sql_syntax, "小可爱", 2)
 	if err != nil {
 		fmt.Println("插入数据失败", err)
 		return
 	}
-	newid, err := result.RowsAffected()
+	var n int64
+	n, err = result.RowsAffected()
 	if err != nil {
 		fmt.Println("更新数据失败", err)
 		return
 	}
-	fmt.Printf("更新的id在：%d\n", newid)
+	fmt.Printf("更新行数为：%d\n", n)
 
 }
 //删除
@@ -110,6 +111,7 @@ func deleterow() {
 		fmt.Println("删除失败", err)
 		return
 	}
+
 	delid, err := result.RowsAffected()
 	if err != nil {
 		fmt.Println("删除失败", err)
@@ -131,7 +133,7 @@ func main() {
 	//queryrow()
 	queryMultiRow()
 	//insertrow()
-	//updaterow()
+	updaterow()
 	//deleterow()
 
 }
