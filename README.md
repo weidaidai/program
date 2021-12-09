@@ -139,3 +139,13 @@ num, err := rdb.ZAdd(zsetkey, languages...).Result()
 
 ```
 
+### Http
+
+![](image\http.png)
+
+服务器在接收到请求时，首先会进入路由(`router`)，也成为服务复用器（`Multiplexe`），路由的工作在于请求找到对应的处理器(`handler`)，处理器对接收到的请求进行相应处理后构建响应并返回给客户端。Go实现的`http server`同样遵循这样的处理流程。
+
+go 启动http server 一般常见有两种
+
+我一般使用HandleFunc
+

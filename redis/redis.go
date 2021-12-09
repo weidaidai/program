@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/go-redis/redis" //自带原生连接池
 )
 
@@ -112,6 +113,7 @@ func set() {
 	fmt.Println(vals)
 
 }
+
 //zset
 func zset() {
 	zsetkey := "database"
@@ -127,20 +129,21 @@ func zset() {
 	}
 	fmt.Println("值为", num)
 }
+
+//zrange
 func zranges() {
 
-	vals,err:=rdb.ZRange("database",0,-1).Result()
+	vals, err := rdb.ZRange("database", 0, -1).Result()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("database 结果为",vals)
+	fmt.Println("database 结果为", vals)
 }
 
 func main() {
-	if err := initclient();
-		err != nil {
+	if err := initclient(); err != nil {
 
-		fmt.Println("init redis faild,err:%v", err)
+		fmt.Printf("init redis faild,err:%v", err)
 		return
 
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql" //database/sql仅提供基本的接口，还需指定一个第三方的数据库
 	"fmt"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -53,7 +54,7 @@ func queryMultiRow() {
 	sql_syntax := "select id, name, age from user where id > ?"
 	rows, err := db.Query(sql_syntax, 0)
 	if err != nil {
-		fmt.Printf("查询多条数据失败", err)
+		fmt.Println("查询多条数据失败", err)
 		return
 	}
 	// 关闭rows释放持有的数据库链接
@@ -70,6 +71,7 @@ func queryMultiRow() {
 		fmt.Printf("id:%d name:%s age:%d\n", u.id, u.name, u.age)
 	}
 }
+
 //插入
 func insertrow() {
 	sql_syntax := "insert into user(name,age)values(?,?)"
@@ -86,6 +88,7 @@ func insertrow() {
 	fmt.Printf("新插入的id为%d\n", newid)
 
 }
+
 //更新
 func updaterow() {
 	sql_syntax := "update user set name=? where id=?"
@@ -103,6 +106,7 @@ func updaterow() {
 	fmt.Printf("更新行数为：%d\n", n)
 
 }
+
 //删除
 func deleterow() {
 	sql_syntax := "delete from user where id=?"
@@ -121,8 +125,7 @@ func deleterow() {
 
 }
 func main() {
-	if err := initDB();
-		err != nil {
+	if err := initDB(); err != nil {
 		fmt.Println("初始化连接失败", err)
 		return
 	}
