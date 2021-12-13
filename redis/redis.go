@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/go-redis/redis" //自带原生连接池
 )
 
-var rdb *redis.Client
 
 // init
 
-func initclient() (err error) {
+func initclient() (rdb *redis.Client,err error) {
 
 	rdb = redis.NewClient(&redis.Options{
 		Addr:     "127.0.0.1:6379",
@@ -20,16 +20,16 @@ func initclient() (err error) {
 	})
 	_, err = rdb.Ping().Result()
 	if err != nil {
-		return err
+		panic(err)
 	}
-	return nil
+	return rdb,err
 }
 
 //string
-func redis_set() {
+func redis_set(rdb *redis.Client) {
 	err := rdb.Set("name", 1000, 0).Err()
 	if err != nil {
-		fmt.Println("无法设置", err)
+		log.Fatal("无法设置", err)
 		return
 	}
 	var val string
@@ -40,7 +40,7 @@ func redis_set() {
 	}
 	fmt.Println("name", val)
 }
-func setex() {
+func setex(rdb *redis.Client) {
 	err := rdb.Set("set1", 188, 0).Err()
 	if err != nil {
 		fmt.Println("set设置错误", err)
@@ -57,7 +57,7 @@ func setex() {
 }
 
 //hash
-func hash() {
+func hash(rdb *redis.Client) {
 
 	data := make(map[string]interface{})
 	data["id"] = 1
@@ -82,7 +82,7 @@ func hash() {
 }
 
 //list
-func list() {
+func list(rdb *redis.Client) {
 	err := rdb.LPush("list1", "redis").Err()
 	if err != nil {
 		panic(err)
@@ -99,7 +99,7 @@ func list() {
 
 //set
 
-func set() {
+func set(rdb *redis.Client) {
 	err := rdb.SAdd("set1", "mysql").Err()
 	if err != nil {
 		panic(err)
@@ -115,7 +115,7 @@ func set() {
 }
 
 //zset
-func zset() {
+func zset(rdb *redis.Client) {
 	zsetkey := "database"
 	languages := []redis.Z{
 		redis.Z{95, "mysql"},
@@ -124,14 +124,14 @@ func zset() {
 	}
 	num, err := rdb.ZAdd(zsetkey, languages...).Result()
 	if err != nil {
-		fmt.Println("zdd 错误")
+		log.Fatal("zdd 错误",err)
 		return
 	}
 	fmt.Println("值为", num)
 }
 
 //zrange
-func zranges() {
+func zranges(rdb *redis.Client) {
 
 	vals, err := rdb.ZRange("database", 0, -1).Result()
 	if err != nil {
@@ -141,19 +141,18 @@ func zranges() {
 }
 
 func main() {
-	if err := initclient(); err != nil {
 
-		fmt.Printf("init redis faild,err:%v", err)
-		return
-
+	rdb,err:= initclient()
+	if err != nil {
+		panic(err)
 	}
-	fmt.Println("redis连接成功")
+	fmt.Println("连接成功")
 	//记得释放资源
 	defer rdb.Close()
-	//redis_set()
+	redis_set(rdb)
 	//setex()
 	//zset()
 	//hash()
 	//list()
-	zranges()
+	zranges(rdb)
 }

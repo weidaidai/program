@@ -78,21 +78,21 @@ func insertrow(db *sql.DB) {
 }
 
 //更新
-func updaterow(db *sql.DB, err error) {
+func Updaterow(db *sql.DB,id int64)(int64,error) {
 	sql_syntax := "update user set name=? where id=?"
-	result, err := db.Exec(sql_syntax, "小可爱", 2)
+	result, err := db.Exec(sql_syntax, "小", 2)
 	if err != nil {
 		log.Fatal("插入数据失败", err)
-		return
+		return -1,err
 	}
-	var n int64
-	n, err = result.RowsAffected()
-	if err != nil {
-		fmt.Println("更新数据失败", err)
-		return
-	}
-	fmt.Printf("更新行数为：%d\n", n)
 
+	id, err = result.RowsAffected()
+	if err != nil {
+		log.Fatal("更新数据失败", err)
+		return -1 ,err
+	}
+	fmt.Printf("更新行数为：%d\n", id)
+    return id,err
 }
 
 //删除
@@ -121,9 +121,10 @@ func main() {
 	//释放资源
 	defer db.Close()
 
-	queryMultiRow(db)
+	//queryMultiRow(db)
 	//insertrow(db)
-	//updaterow()
-	//deleterow()
+	Updaterow(db,4)
+	//deleterow(db)
+
 
 }
