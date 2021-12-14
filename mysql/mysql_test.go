@@ -6,7 +6,6 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
-// a successful case
 
 	func TestUpdaterow(t *testing.T) {
 		db, mock, _ := sqlmock.New()
