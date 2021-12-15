@@ -1,17 +1,11 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-	func TestUpdaterow(t *testing.T) {
-		db, mock, _ := sqlmock.New()
-		mock.ExpectExec("update set person").WillReturnResult(sqlmock.NewResult(100, 1))
+func Test_queryMultiRow(t *testing.T) {
 
-		id, err := Updaterow(db, 1)
-		assert.Equal(t, id, int64(100))
-		assert.Nil(t, err)
-	}
+}

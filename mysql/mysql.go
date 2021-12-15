@@ -39,8 +39,8 @@ func initDB(dsn string) (db *sql.DB, err error) {
 
 // 查询数据
 func queryMultiRow(db *sql.DB) {
-	sql_syntax := "select id, name, age from user where id> ? and id< ?"
-	rows, err := db.Query(sql_syntax, 1, 3)
+	sql_syntax := "select id, name, age from user where id>?"
+	rows, err := db.Query(sql_syntax, 2)
 	if err != nil {
 		log.Fatal("查询多条数据失败", err)
 		return
@@ -62,8 +62,8 @@ func queryMultiRow(db *sql.DB) {
 
 //插入
 func insertrow(db *sql.DB) {
-	sql_syntax := "insert into user(name,age)values(?,?)"
-	result, err := db.Exec(sql_syntax, "小微", 22)
+	sql_syntax := "insert into user(name,age)values(?,?),"
+	result, err := db.Exec(sql_syntax, "小微", 5)
 	if err != nil {
 		log.Fatal("插入数据失败", err)
 		return
@@ -121,9 +121,9 @@ func main() {
 	//释放资源
 	defer db.Close()
 
-	//queryMultiRow(db)
-	//insertrow(db)
-	Updaterow(db,4)
+	queryMultiRow(db)
+     //insertrow(db)
+	//Updaterow(db,4)
 	//deleterow(db)
 
 
