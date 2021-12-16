@@ -2,28 +2,17 @@ package main
 
 import (
 	"database/sql" //database/sql仅提供基本的接口，还需指定一个第三方的数据库
+	"errors"
 	"fmt"
-	"log"
-
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// User   用户对象，定义了用户的基础信息
-type user struct {
-	id   int    //用户id
-	age  int    // 年龄
-	name string //姓名
-}
-
 // 定义一个初始化数据库的函数
-func initDB(dsn string) (db *sql.DB, err error) {
-
+func openDB(dsn string) (*sql.DB, error) {
 	//初始化全局的db对象
-	db, err = sql.Open("mysql", dsn)
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		log.Fatal(err)
-		return
-
+		return nil, err
 	}
 	//设置数据库最大连接数
 	db.SetConnMaxLifetime(10)
@@ -31,100 +20,169 @@ func initDB(dsn string) (db *sql.DB, err error) {
 	db.SetMaxIdleConns(5)
 	// 尝试与数据库建立连接（校验dsn是否正确）
 	if err := db.Ping(); err != nil {
-		panic(err)
+		return nil, err
 	}
-
 	return db, err
 }
 
-// 查询数据
-func queryMultiRow(db *sql.DB) {
-	sql_syntax := "select id, name, age from user where id>?"
-	rows, err := db.Query(sql_syntax, 2)
-	if err != nil {
-		log.Fatal("查询多条数据失败", err)
-		return
-	}
-	// 关闭rows释放持有的数据库链接
-	defer rows.Close()
+type Student struct {
+	Id   int
+	Name string
+	Age  int
+}
 
+// TODO 删除STUDENT表
+
+func dropTable(db *sql.DB) error {
+	sql := "drop table Student"
+	if _, err := db.Exec(sql); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	fmt.Println("Table created successfully")
+
+	return nil
+}
+
+// TODO 创建STUDENT表
+func createStudentTable(db *sql.DB) error {
+
+	TABLE := `
+            CREATE TABLE Student (
+                Id  INT AUTO_INCREMENT,
+                Name VARCHAR(50) ,
+                Age INT ,
+                PRIMARY KEY (Id)
+            );`
+	if _, err := db.Exec(TABLE); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	fmt.Println("Table created successfully")
+
+	return nil
+}
+
+// TODO 保存Student
+func saveStudent(db *sql.DB, s *Student) error {
+	sql := "insert into Student(NAME,AGE)values(?,?)"
+
+	result, err := db.Exec(sql, &s.Name, &s.Age)
+	if err != nil {
+		return err
+	}
+	newid, _ := result.LastInsertId()
+	if err != nil {
+		fmt.Println("seve failed", err)
+		return err
+	}
+	fmt.Printf("new id为%d\n", newid)
+	return nil
+
+}
+
+// TODO 删除Student
+func deleteStudent(db *sql.DB, id int) error {
+	sql := "delete from Student where Id=?"
+	result, err := db.Exec(sql, id)
+	if err != nil {
+		fmt.Println("delete failed", err)
+		return err
+	}
+
+	_, err = result.RowsAffected()
+	if err != nil {
+		fmt.Println("delete  student failed", err)
+		return err
+	}
+
+	fmt.Printf("delete  student successful：%d\n", id)
+	return err
+
+}
+
+// TODO 根据ID查Student
+func getStudentById(db *sql.DB, id int) error {
+	sql := "select ID, NAME, AGE from Student where ID=?"
+	rows, e := db.Query(sql, id)
+	if e == nil {
+		errors.New("Query err")
+	}
+	defer rows.Close()
 	// 循环读取结果集中的数据
 	for rows.Next() {
-		var u user
-		err := rows.Scan(&u.id, &u.name, &u.age)
+		var s Student
+		err := rows.Scan(&s.Id, &s.Name, &s.Age)
 		if err != nil {
-			log.Fatal("查询多条数据失败", err)
-			return
+			return err
 		}
-		fmt.Printf("id:%d name:%s age:%d\n", u.id, u.name, u.age)
+		fmt.Printf("id:%d name:%s age:%d\n", s.Id, s.Name, s.Age)
 	}
+	return nil
 }
 
-//插入
-func insertrow(db *sql.DB) {
-	sql_syntax := "insert into user(name,age)values(?,?),"
-	result, err := db.Exec(sql_syntax, "小微", 5)
+// TODO 更新Student
+func updateStudent(db *sql.DB, s *Student) error {
+	sql_syntax := "update Student set Name=? where Id=?"
+	result, err := db.Exec(sql_syntax, s.Name, s.Id)
 	if err != nil {
-		log.Fatal("插入数据失败", err)
-		return
+		fmt.Println("Exec update student failed", err)
+		return err
 	}
-	newid, err := result.LastInsertId()
-	if err != nil {
-		log.Fatal("获取插入的id失败", err)
-		return
-	}
-	fmt.Printf("新插入的id为%d\n", newid)
-
-}
-
-//更新
-func Updaterow(db *sql.DB,id int64)(int64,error) {
-	sql_syntax := "update user set name=? where id=?"
-	result, err := db.Exec(sql_syntax, "小", 2)
-	if err != nil {
-		log.Fatal("插入数据失败", err)
-		return -1,err
-	}
-
+	var id int64
 	id, err = result.RowsAffected()
 	if err != nil {
-		log.Fatal("更新数据失败", err)
-		return -1 ,err
+		fmt.Println("update student failed", err)
+		return err
 	}
-	fmt.Printf("更新行数为：%d\n", id)
-    return id,err
+
+	fmt.Printf("update student successful：%d\n", id)
+	return nil
 }
 
-//删除
-func deleterow(db *sql.DB) {
-	sql_syntax := "delete from user where id=?"
-	result, err := db.Exec(sql_syntax, 1)
+// TODO 把所有Student拿出来
+func listAllStudents(db *sql.DB) ([]*Student, error) {
+	sql := "select *from Student"
+
+	rows, err := db.Query(sql, 0)
 	if err != nil {
-		log.Fatal("删除失败", err)
-		return
+		fmt.Println(err)
+	}
+	var u []*Student
+	//循环读取结果
+	for rows.Next() {
+		var s *Student
+		//将每一行的结果都赋值到一个s对象中
+		err := rows.Scan(&s.Id, &s.Name, &s.Age)
+		if err != nil {
+			fmt.Println("rows failed", err)
+
+		}
+		fmt.Println(s.Id, s.Name, s.Age)
+		u = append(u, s)
 	}
 
-	delid, err := result.RowsAffected()
-	if err != nil {
-		log.Fatal("删除失败", err)
-		return
-	}
-	fmt.Printf("删除id在：%d\n", delid)
-
+	return u, nil
 }
+
 func main() {
-	db, err := initDB("root:123456@tcp(127.0.0.1:3306)/sql_domo")
+
+	db, err := openDB("root:123456@tcp(127.0.0.1:3306)/sql_domo?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("连接成功")
+	fmt.Println("Connection successful")
 	//释放资源
 	defer db.Close()
-
-	queryMultiRow(db)
-     //insertrow(db)
-	//Updaterow(db,4)
-	//deleterow(db)
-
+	//createStudentTable(db)
+	//s:= &Student{ Name: "weidongqi", Age: 22}
+	//saveStudent(db,s)
+	//getStudentById(db, 3)
+	//s:= &Student{Id: 2, Name: "weidongqi", Age: 2}
+	//updateStudent(db,s)
+	//listAllStudents(db)
+	//deleteStudent(db,1)
 
 }

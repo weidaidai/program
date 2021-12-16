@@ -7,22 +7,15 @@ import (
 	"github.com/go-redis/redis" //自带原生连接池
 )
 
+// TODO connention redis
 
-// init
+func openclient(rdb *redis.Client) (err error) {
 
-func initclient() (rdb *redis.Client,err error) {
-
-	rdb = redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		Password: "",
-		DB:       0,
-		PoolSize: 100,
-	})
 	_, err = rdb.Ping().Result()
 	if err != nil {
 		panic(err)
 	}
-	return rdb,err
+	return err
 }
 
 //string
@@ -82,7 +75,7 @@ func hash(rdb *redis.Client) {
 }
 
 //list
-func list(rdb *redis.Client) {
+func list(rdb *redis.Client) error {
 	err := rdb.LPush("list1", "redis").Err()
 	if err != nil {
 		panic(err)
@@ -94,12 +87,12 @@ func list(rdb *redis.Client) {
 		panic(err)
 	}
 	fmt.Println(vals)
-
+	return err
 }
 
 //set
 
-func set(rdb *redis.Client) {
+func set(rdb *redis.Client) error {
 	err := rdb.SAdd("set1", "mysql").Err()
 	if err != nil {
 		panic(err)
@@ -111,7 +104,7 @@ func set(rdb *redis.Client) {
 		panic(err)
 	}
 	fmt.Println(vals)
-
+	return err
 }
 
 //zset
@@ -124,7 +117,7 @@ func zset(rdb *redis.Client) {
 	}
 	num, err := rdb.ZAdd(zsetkey, languages...).Result()
 	if err != nil {
-		log.Fatal("zdd 错误",err)
+		log.Fatal("zdd 错误", err)
 		return
 	}
 	fmt.Println("值为", num)
@@ -142,14 +135,20 @@ func zranges(rdb *redis.Client) {
 
 func main() {
 
-	rdb,err:= initclient()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "127.0.0.1:6379",
+		Password: "",
+		DB:       0,
+		PoolSize: 100,
+	})
+	err := openclient(rdb)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("连接成功")
 	//记得释放资源
-	defer rdb.Close()
-	redis_set(rdb)
+
+	//redis_set(rdb)
 	//setex()
 	//zset()
 	//hash()

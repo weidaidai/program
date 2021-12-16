@@ -58,7 +58,7 @@ func (c *controller) Update(ctx *gin.Context) {
 		if video.Id == videoupdate.Id {
 
 			c.video[id] = videoupdate
-			ctx.String(200, "已成功更新%d",videoupdate.Id)
+			ctx.String(200, "已成功更新%d", videoupdate.Id)
 			return
 		}
 	}
@@ -85,7 +85,7 @@ func (c *controller) Delete(ctx *gin.Context) {
 		if video.Id == videodelete.Id {
 
 			c.video = append(c.video[0:id], c.video[id+1:len(c.video)]...)
-			ctx.String(200, "已成功删除%d",videodelete.Id)
+			ctx.String(200, "已成功删除%d", videodelete.Id)
 			return
 		}
 	}
