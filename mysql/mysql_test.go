@@ -30,27 +30,6 @@ func insertTestStudent(t *testing.T, db *sql.DB, s *Student) {
 	}
 }
 
-// TODO 把STUDENT表删掉
-func Test_dropTable(t *testing.T, db *sql.DB) {
-
-	db := prepareDB(t)
-	defer db.Close()
-
-	t.Run("drop table", func(t *testing.T) {
-		defer dropTable(t, db)
-
-		wantErr := false
-		if err := dropTable(db); (err != nil) != wantErr {
-			t.Errorf("dropTable() error = %v, wantErr %v", err, wantErr)
-		}
-		_, err2 := listAllStudents(db)
-		if err2 != nil {
-			t.Error(err2)
-		}
-	})
-
-}
-
 func Test_openDB(t *testing.T) {
 	type args struct {
 		dsn string
@@ -89,13 +68,31 @@ func Test_openDB(t *testing.T) {
 	}
 }
 
+// TODO 把STUDENT表删掉
+func Test_dropTable(t *testing.T) {
+	db := prepareDB(t)
+	defer db.Close()
+	t.Run("", func(t *testing.T) {
+		wantErr := true
+		if err := dropTable(db); (err != nil) != wantErr {
+			t.Errorf("dropTable() error = %v, wantErr %v", err, wantErr)
+		}
+		_, err2 := listAllStudents(db)
+		if err2 != nil {
+			t.Error(err2)
+		}
+	})
+
+}
+
+// TODO 创STUDENT表
 func Test_createStudentTable(t *testing.T) {
 
 	db := prepareDB(t)
 	defer db.Close()
 
 	t.Run("create table", func(t *testing.T) {
-		defer dropTable(t, db)
+		defer dropTable(db)
 
 		wantErr := false
 		if err := createStudentTable(db); (err != nil) != wantErr {
@@ -117,7 +114,7 @@ func Test_saveStudent(t *testing.T) {
 
 	t.Run("save not exist", func(t *testing.T) {
 		prepareTable(t, db)
-		defer dropTable(t, db)
+		defer dropTable(db)
 
 		s := &Student{
 			Id:   1,
@@ -140,7 +137,7 @@ func Test_saveStudent(t *testing.T) {
 
 	t.Run("save exist", func(t *testing.T) {
 		prepareTable(t, db)
-		defer dropTable(t, db)
+		defer dropTable(db)
 
 		s := &Student{
 			Id:   1,
@@ -162,7 +159,7 @@ func Test_updateStudent(t *testing.T) {
 
 	t.Run("update exist", func(t *testing.T) {
 		prepareTable(t, db)
-		defer dropTable(t, db)
+		defer dropTable(db)
 
 		s1 := &Student{Id: 1, Name: "weidongqi", Age: 22}
 		insertTestStudent(t, db, s1)
@@ -187,7 +184,7 @@ func Test_updateStudent(t *testing.T) {
 
 	t.Run("update not exist", func(t *testing.T) {
 		prepareTable(t, db)
-		defer dropTable(t, db)
+		defer dropTable(db)
 
 		s2 := &Student{
 			Id:   2,
@@ -208,7 +205,7 @@ func Test_deleteStudent(t *testing.T) {
 
 	t.Run("delete exist", func(t *testing.T) {
 		prepareTable(t, db)
-		defer dropTable(t, db)
+		defer dropTable(db)
 
 		s1 := &Student{Id: 1, Name: "weidongqi", Age: 22}
 		insertTestStudent(t, db, s1)
@@ -228,7 +225,7 @@ func Test_deleteStudent(t *testing.T) {
 
 	t.Run("delete not exist", func(t *testing.T) {
 		prepareTable(t, db)
-		defer dropTable(t, db)
+		defer dropTable(db)
 
 		wantErr := false
 		if err := deleteStudent(db, 2); (err != nil) != wantErr {
@@ -239,12 +236,15 @@ func Test_deleteStudent(t *testing.T) {
 }
 
 func Test_listAllStudents(t *testing.T) {
+	//连接数据库
 	db := prepareDB(t)
+
 	defer db.Close()
-
+	//创表
 	prepareTable(t, db)
-	defer dropTable(t, db)
-
+	//test结束后删表
+	defer dropTable(db)
+	//插入数据
 	s1 := &Student{Id: 1, Name: "weidongqi", Age: 22}
 	s2 := &Student{Id: 2, Name: "weidongqi2", Age: 33}
 	insertTestStudent(t, db, s1)

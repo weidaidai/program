@@ -40,7 +40,7 @@ func dropTable(db *sql.DB) error {
 		return err
 	}
 
-	fmt.Println("Table created successfully")
+	fmt.Println("Table drop successfully")
 
 	return nil
 }
@@ -99,12 +99,12 @@ func deleteStudent(db *sql.DB, id int) error {
 	}
 
 	fmt.Printf("delete  student successful：%d\n", id)
-	return err
+	return nil
 
 }
 
 // TODO 根据ID查Student
-func getStudentById(db *sql.DB, id int) error {
+func getStudentById(db *sql.DB, id int) (*Student, error) {
 	sql := "select ID, NAME, AGE from Student where ID=?"
 	rows, e := db.Query(sql, id)
 	if e == nil {
@@ -116,11 +116,11 @@ func getStudentById(db *sql.DB, id int) error {
 		var s Student
 		err := rows.Scan(&s.Id, &s.Name, &s.Age)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		fmt.Printf("id:%d name:%s age:%d\n", s.Id, s.Name, s.Age)
 	}
-	return nil
+	return nil, nil
 }
 
 // TODO 更新Student
@@ -150,21 +150,21 @@ func listAllStudents(db *sql.DB) ([]*Student, error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	var u []*Student
+	defer rows.Close()
 	//循环读取结果
 	for rows.Next() {
-		var s *Student
+		var s Student
 		//将每一行的结果都赋值到一个s对象中
 		err := rows.Scan(&s.Id, &s.Name, &s.Age)
 		if err != nil {
 			fmt.Println("rows failed", err)
-
+			return nil, err
 		}
-		fmt.Println(s.Id, s.Name, s.Age)
-		u = append(u, s)
+		fmt.Printf("id:%d name:%s age:%d\n", s.Id, s.Name, s.Age)
+
 	}
 
-	return u, nil
+	return nil, nil
 }
 
 func main() {
@@ -184,5 +184,6 @@ func main() {
 	//updateStudent(db,s)
 	//listAllStudents(db)
 	//deleteStudent(db,1)
+	//dropTable(db)
 
 }

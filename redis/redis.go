@@ -19,34 +19,19 @@ func openclient(rdb *redis.Client) (err error) {
 }
 
 //string
-func redis_set(rdb *redis.Client) {
-	err := rdb.Set("name", 1000, 0).Err()
+func redis_set(rdb *redis.Client) error {
+
+	err := rdb.Set("user", 1000, 0).Err()
 	if err != nil {
-		log.Fatal("无法设置", err)
-		return
+		return err
 	}
 	var val string
 	val, err = rdb.Get("name").Result()
 	if err != nil {
-		fmt.Println("获取值失败", err)
-		return
+		return err
 	}
 	fmt.Println("name", val)
-}
-func setex(rdb *redis.Client) {
-	err := rdb.Set("set1", 188, 0).Err()
-	if err != nil {
-		fmt.Println("set设置错误", err)
-		return
-	}
-
-	val2, err := rdb.SMembers("set").Result()
-	if err != nil {
-		fmt.Println("获取set值失败", err)
-		return
-
-	}
-	fmt.Println("set1", val2)
+	return err
 }
 
 //hash
@@ -149,9 +134,8 @@ func main() {
 	//记得释放资源
 
 	//redis_set(rdb)
-	//setex()
 	//zset()
 	//hash()
 	//list()
-	zranges(rdb)
+	//zranges(rdb)
 }
