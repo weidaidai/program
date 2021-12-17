@@ -71,9 +71,13 @@ func Test_openDB(t *testing.T) {
 // TODO 把STUDENT表删掉
 func Test_dropTable(t *testing.T) {
 	db := prepareDB(t)
+
 	defer db.Close()
+
 	t.Run("", func(t *testing.T) {
-		wantErr := true
+
+		wantErr := false
+
 		if err := dropTable(db); (err != nil) != wantErr {
 			t.Errorf("dropTable() error = %v, wantErr %v", err, wantErr)
 		}
@@ -109,13 +113,17 @@ func Test_createStudentTable(t *testing.T) {
 
 func Test_saveStudent(t *testing.T) {
 
+	//连接数据库
 	db := prepareDB(t)
+
 	defer db.Close()
+
+	//test结束后删表
+	defer dropTable(db)
 
 	t.Run("save not exist", func(t *testing.T) {
 		prepareTable(t, db)
 		defer dropTable(db)
-
 		s := &Student{
 			Id:   1,
 			Name: "weidongqi",
@@ -210,9 +218,9 @@ func Test_deleteStudent(t *testing.T) {
 		s1 := &Student{Id: 1, Name: "weidongqi", Age: 22}
 		insertTestStudent(t, db, s1)
 
-		wantErr := false
+		wantErr := true
 		if err := deleteStudent(db, 1); (err != nil) != wantErr {
-			t.Errorf("updateStudent() error = %v, wantErr %v", err, wantErr)
+			t.Errorf("deleteStudent() error = %v, wantErr %v", err, wantErr)
 		}
 		s2, err2 := getStudentById(db, 1)
 		if err2 != nil {

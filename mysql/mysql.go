@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql" //database/sql仅提供基本的接口，还需指定一个第三方的数据库
-	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -39,9 +38,7 @@ func dropTable(db *sql.DB) error {
 		fmt.Println(err)
 		return err
 	}
-
 	fmt.Println("Table drop successfully")
-
 	return nil
 }
 
@@ -106,9 +103,10 @@ func deleteStudent(db *sql.DB, id int) error {
 // TODO 根据ID查Student
 func getStudentById(db *sql.DB, id int) (*Student, error) {
 	sql := "select ID, NAME, AGE from Student where ID=?"
-	rows, e := db.Query(sql, id)
-	if e == nil {
-		errors.New("Query err")
+	var U = &Student{}
+	rows, err := db.Query(sql, id)
+	if err != nil {
+		return nil, err
 	}
 	defer rows.Close()
 	// 循环读取结果集中的数据
@@ -118,57 +116,60 @@ func getStudentById(db *sql.DB, id int) (*Student, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		fmt.Printf("id:%d name:%s age:%d\n", s.Id, s.Name, s.Age)
 	}
-	return nil, nil
+	return U, nil
 }
 
 // TODO 更新Student
 func updateStudent(db *sql.DB, s *Student) error {
+
 	sql_syntax := "update Student set Name=? where Id=?"
 	result, err := db.Exec(sql_syntax, s.Name, s.Id)
 	if err != nil {
-		fmt.Println("Exec update student failed", err)
 		return err
 	}
+
 	var id int64
 	id, err = result.RowsAffected()
 	if err != nil {
-		fmt.Println("update student failed", err)
 		return err
 	}
 
 	fmt.Printf("update student successful：%d\n", id)
-	return nil
+	return err
 }
 
 // TODO 把所有Student拿出来
 func listAllStudents(db *sql.DB) ([]*Student, error) {
+	u := make([]*Student, 0, 10)
 	sql := "select *from Student"
-
-	rows, err := db.Query(sql, 0)
+	rows, err := db.Query(sql)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	defer rows.Close()
 	//循环读取结果
+
 	for rows.Next() {
+
 		var s Student
 		//将每一行的结果都赋值到一个s对象中
 		err := rows.Scan(&s.Id, &s.Name, &s.Age)
 		if err != nil {
-			fmt.Println("rows failed", err)
+
 			return nil, err
 		}
-		fmt.Printf("id:%d name:%s age:%d\n", s.Id, s.Name, s.Age)
 
+		fmt.Printf("id:%d name:%s age:%d\n", s.Id, s.Name, s.Age)
+		u = append(u, &s)
 	}
 
-	return nil, nil
+	return u, err
 }
 
 func main() {
-
 	db, err := openDB("root:123456@tcp(127.0.0.1:3306)/sql_domo?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		panic(err)
@@ -176,10 +177,10 @@ func main() {
 	fmt.Println("Connection successful")
 	//释放资源
 	defer db.Close()
-	//createStudentTable(db)
+	createStudentTable(db)
 	//s:= &Student{ Name: "weidongqi", Age: 22}
 	//saveStudent(db,s)
-	//getStudentById(db, 3)
+	//getStudentById(db, 2)
 	//s:= &Student{Id: 2, Name: "weidongqi", Age: 2}
 	//updateStudent(db,s)
 	//listAllStudents(db)
