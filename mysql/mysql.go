@@ -64,81 +64,62 @@ func createStudentTable(db *sql.DB) error {
 
 // TODO 保存Student
 func saveStudent(db *sql.DB, s *Student) error {
-	sql := "insert into Student(NAME,AGE)values(?,?)"
+	sqlStr := "insert into Student(Id,NAME,Age)values(?,?,?)"
 
-	result, err := db.Exec(sql, &s.Name, &s.Age)
-	if err != nil {
-		return err
+	_, err := db.Exec(sqlStr, &s.Id, &s.Name, &s.Age)
+	if err == sql.ErrNoRows {
+		panic(err)
+	} else {
+		fmt.Println(s.Id, s.Name, s.Age)
 	}
-	newid, _ := result.LastInsertId()
-	if err != nil {
-		fmt.Println("seve failed", err)
-		return err
-	}
-	fmt.Printf("new id为%d\n", newid)
-	return nil
 
+	return err
 }
 
 // TODO 删除Student
 func deleteStudent(db *sql.DB, id int) error {
-	sql := "delete from Student where Id=?"
-	result, err := db.Exec(sql, id)
-	if err != nil {
-		fmt.Println("delete failed", err)
-		return err
+	sqlStr := "delete from Student where Id=?"
+	_, err := db.Exec(sqlStr, id)
+	if err == sql.ErrNoRows {
+		panic(err)
+	} else {
+		fmt.Println(id)
 	}
+	return err
 
-	_, err = result.RowsAffected()
-	if err != nil {
-		fmt.Println("delete  student failed", err)
-		return err
-	}
-
-	fmt.Printf("delete  student successful：%d\n", id)
-	return nil
-
-}
-
-// TODO 根据ID查Student
-func getStudentById(db *sql.DB, id int) (*Student, error) {
-	sql := "select ID, NAME, AGE from Student where ID=?"
-	var U = &Student{}
-	rows, err := db.Query(sql, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	// 循环读取结果集中的数据
-	for rows.Next() {
-		var s Student
-		err := rows.Scan(&s.Id, &s.Name, &s.Age)
-		if err != nil {
-			return nil, err
-		}
-
-		fmt.Printf("id:%d name:%s age:%d\n", s.Id, s.Name, s.Age)
-	}
-	return U, nil
 }
 
 // TODO 更新Student
 func updateStudent(db *sql.DB, s *Student) error {
 
-	sql_syntax := "update Student set Name=? where Id=?"
-	result, err := db.Exec(sql_syntax, s.Name, s.Id)
+	sqlStr := "update Student set Name=?,age=? where Id=?"
+
+	row, err := db.Exec(sqlStr, &s.Name, &s.Age, &s.Id)
 	if err != nil {
 		return err
 	}
+	if r, err := row.RowsAffected(); err == nil {
+		if r <= 0 {
+			return err
+		}
+		fmt.Println(r)
 
-	var id int64
-	id, err = result.RowsAffected()
-	if err != nil {
-		return err
 	}
-
-	fmt.Printf("update student successful：%d\n", id)
 	return err
+}
+
+// TODO 根据ID查Student
+func getStudentById(db *sql.DB, id int) (*Student, error) {
+	sqlStr := "select ID, NAME, AGE from Student where ID=?"
+	var U = &Student{}
+	err := db.QueryRow(sqlStr, id).Scan(&U.Id, &U.Name, &U.Age)
+	if err == sql.ErrNoRows {
+		panic(err)
+	} else {
+		fmt.Println(U.Id, U.Name, U.Age)
+	}
+	// 循环读取结果集中的数据
+	return U, nil
 }
 
 // TODO 把所有Student拿出来
@@ -177,12 +158,12 @@ func main() {
 	fmt.Println("Connection successful")
 	//释放资源
 	defer db.Close()
-	createStudentTable(db)
-	//s:= &Student{ Name: "weidongqi", Age: 22}
-	//saveStudent(db,s)
+	//createStudentTable(db)
+	//s1:= &Student{ Id:2,Name: "weidongqi", Age: 22}
+	//saveStudent(db,s1)
 	//getStudentById(db, 2)
-	//s:= &Student{Id: 2, Name: "weidongqi", Age: 2}
-	//updateStudent(db,s)
+	s := &Student{Id: 2, Name: "weidongqi", Age: 2}
+	updateStudent(db, s)
 	//listAllStudents(db)
 	//deleteStudent(db,1)
 	//dropTable(db)

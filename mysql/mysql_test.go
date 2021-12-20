@@ -71,7 +71,7 @@ func Test_openDB(t *testing.T) {
 // TODO 把STUDENT表删掉
 func Test_dropTable(t *testing.T) {
 	db := prepareDB(t)
-
+	prepareTable(t, db)
 	defer db.Close()
 
 	t.Run("", func(t *testing.T) {
@@ -81,6 +81,7 @@ func Test_dropTable(t *testing.T) {
 		if err := dropTable(db); (err != nil) != wantErr {
 			t.Errorf("dropTable() error = %v, wantErr %v", err, wantErr)
 		}
+		prepareTable(t, db)
 		_, err2 := listAllStudents(db)
 		if err2 != nil {
 			t.Error(err2)
