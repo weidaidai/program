@@ -201,7 +201,7 @@ func Test_updateStudent(t *testing.T) {
 			Age:  33,
 		}
 		wantErr := true
-		if err := updateStudent(db, s2); (err != nil) != wantErr {
+		if err := updateStudent(db, s2); (err == nil) != wantErr {
 			t.Errorf("updateStudent() error = %v, wantErr %v", err, wantErr)
 		}
 	})
@@ -235,7 +235,6 @@ func Test_deleteStudent(t *testing.T) {
 	t.Run("delete not exist", func(t *testing.T) {
 		prepareTable(t, db)
 		defer dropTable(db)
-
 		wantErr := false
 		if err := deleteStudent(db, 2); (err != nil) != wantErr {
 			t.Errorf("deleteStudent() error = %v, wantErr %v", err, wantErr)

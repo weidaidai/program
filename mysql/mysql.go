@@ -79,11 +79,22 @@ func saveStudent(db *sql.DB, s *Student) error {
 // TODO 删除Student
 func deleteStudent(db *sql.DB, id int) error {
 	sqlStr := "delete from Student where Id=?"
-	_, err := db.Exec(sqlStr, id)
-	if err == sql.ErrNoRows {
-		panic(err)
-	} else {
-		fmt.Println(id)
+	row, err := db.Exec(sqlStr, id)
+	//if err == sql.ErrNoRows {
+	//	panic(err)
+	//} else {
+	//	fmt.Println(id)
+	//}
+	r, err := row.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if r <= 0 {
+		//panic(err)
+		fmt.Println("Data has been deleted or does not exist")
+	} else if r > 0 {
+		fmt.Println(r)
+
 	}
 	return err
 
@@ -98,13 +109,24 @@ func updateStudent(db *sql.DB, s *Student) error {
 	if err != nil {
 		return err
 	}
-	if r, err := row.RowsAffected(); err == nil {
-		if r <= 0 {
-			return err
-		}
-		fmt.Println(r)
+	//if err == sql.ErrNoRows {
+	//	panic(err)
+	//} else {
+	//	fmt.Println(s.Id, s.Name, s.Age)
+	//}
 
+	r, err := row.RowsAffected()
+	if err != nil {
+		return err
 	}
+	if r <= 0 {
+		panic(err)
+		fmt.Println("Update the same data or data does not exist")
+	} else if r > 0 {
+		fmt.Println(r)
+		fmt.Println(&s.Name, &s.Age, &s.Id)
+	}
+
 	return err
 }
 
@@ -153,7 +175,7 @@ func listAllStudents(db *sql.DB) ([]*Student, error) {
 func main() {
 	db, err := openDB("root:123456@tcp(127.0.0.1:3306)/sql_domo?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
-		panic(err)
+		return
 	}
 	fmt.Println("Connection successful")
 	//释放资源
@@ -162,8 +184,8 @@ func main() {
 	//s1:= &Student{ Id:2,Name: "weidongqi", Age: 22}
 	//saveStudent(db,s1)
 	//getStudentById(db, 2)
-	s := &Student{Id: 2, Name: "weidongqi", Age: 2}
-	updateStudent(db, s)
+	//s := &Student{Id: 2, Name: "weidongqi", Age: 2}
+	//updateStudent(db, s)
 	//listAllStudents(db)
 	//deleteStudent(db,1)
 	//dropTable(db)
