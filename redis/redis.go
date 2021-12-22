@@ -148,7 +148,7 @@ type zset_sm struct {
 	Member interface{}
 }
 
-//TODO zset
+//zset
 func zset(rdb *redis.Client, key string, l *zset_sm) error {
 
 	num, err := rdb.ZAdd(key, redis.Z{l.Score, l.Member}).Result()
@@ -177,6 +177,30 @@ func zranges(rdb *redis.Client, key string, start int64, stop int64) ([]*zset_sm
 	return u, err
 }
 
+//del key
+func Delkey(rdb *redis.Client, key string) error {
+	num, err := rdb.Del(key).Result()
+	if err != nil {
+		return err
+	}
+	if num <= 0 {
+		log.Fatalln("key delete failed")
+	} else if num > 0 {
+		println("delete succeed")
+	}
+	return err
+}
+
+//Expire
+func Expire(rdb *redis.Client, key string, time time.Duration) error {
+
+	err := rdb.Expire(key, time).Err()
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 func main() {
 
 	rdb := redis.NewClient(&redis.Options{
@@ -192,9 +216,9 @@ func main() {
 	fmt.Println("Connection successful")
 	//记得释放资源
 	defer rdb.Close()
-	//redis_get(rdb,"kkk")
-	//u:=&User{Key: "kkk",val: 555,time: 0}
-	//redis_set(rdb,u)
+	redis_get(rdb, "kkk")
+	u := &User{Key: "kkk", val: 555, time: 0}
+	redis_set(rdb, u)
 	//gethash(rdb,"class")
 	//zset()
 	//var hashdata = make(map[string]interface{})
@@ -209,10 +233,12 @@ func main() {
 	//student:=&set_student{key:"settttt",val: "shan"}
 	//Set_student(rdb,student)
 	//Smembers(rdb,"settttt")
-	zranges(rdb, "database", 1, -1)
+	//zranges(rdb, "database", 1, -1)
 	//zset_1:=&zset_sm{100,"数学"}
 	//zset_2:=&zset_sm{90,"语文"}
 	//zset(rdb,"database",zset_1)
 	//zset(rdb,"database",zset_2)
+	//u:=&User{Key: "xiaoming",val: 100,time: 0}
+	//redis_set(rdb,u)
 
 }

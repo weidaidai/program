@@ -64,23 +64,17 @@ func Test_openclient(t *testing.T) {
 	}
 }
 
-func Test_redis_set(t *testing.T) {
+//get
+func Test_redis_get(t *testing.T) {
 	//连接数据库
 	rdb := preparerdb(t)
 	defer rdb.Close()
-
-	u := &User{Key: "test1", val: "val", time: 8}
+	//test结束后删表
+	defer Delkey(rdb, "xiaoming")
+	//插入数据
+	u := &User{Key: "xiaoming", val: "100", time: 0}
 	redis_set(rdb, u)
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := redis_set(tt.args.rdb, tt.args.u); (err != nil) != tt.wantErr {
-				t.Errorf("redis_set() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
 
-func Test_redis_get(t *testing.T) {
 	type args struct {
 		rdb *redis.Client
 		key string
@@ -91,7 +85,14 @@ func Test_redis_get(t *testing.T) {
 		want    *User
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "",
+			args: args{rdb: rdb, key: "xiaoming"},
+			want: &User{
+				Key: "xiaoming", val: "100",
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -100,6 +101,7 @@ func Test_redis_get(t *testing.T) {
 				t.Errorf("redis_get() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("redis_get() got = %v, want %v", got, tt.want)
 			}
