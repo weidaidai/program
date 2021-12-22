@@ -116,7 +116,7 @@ func Test_redis_set(t *testing.T) {
 	//延迟关闭
 	defer rdb.Close()
 	//test结束后删key
-	//defer Delkey(rdb,"redis")
+	defer Delkey(rdb,"redis")
 	type args struct {
 		rdb *redis.Client
 		u   *User
