@@ -21,9 +21,11 @@ func preparerdb(t *testing.T) *redis.Client {
 }
 
 func Test_openclient(t *testing.T) {
+
 	type args struct {
 		rdb *redis.Client
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -44,7 +46,7 @@ func Test_openclient(t *testing.T) {
 		{
 			name: "bad case",
 			args: args{redis.NewClient(&redis.Options{
-				Addr:     "127.0..q0.1:6379",
+				Addr:     "127.0.0.1:63799",
 				Password: "",
 				DB:       0,
 				PoolSize: 100,
@@ -64,12 +66,12 @@ func Test_openclient(t *testing.T) {
 	}
 }
 
-//get
+//testing get complete
 func Test_redis_get(t *testing.T) {
 	//连接数据库
 	rdb := preparerdb(t)
 	defer rdb.Close()
-	//test结束后删表
+	//test结束后删key
 	defer Delkey(rdb, "xiaoming")
 	//插入数据
 	u := &User{Key: "xiaoming", val: "100", time: 0}
@@ -86,11 +88,9 @@ func Test_redis_get(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "",
-			args: args{rdb: rdb, key: "xiaoming"},
-			want: &User{
-				Key: "xiaoming", val: "100",
-			},
+			name:    "",
+			args:    args{rdb: rdb, key: "xiaoming"},
+			want:    &User{},
 			wantErr: false,
 		},
 	}
@@ -104,6 +104,62 @@ func Test_redis_get(t *testing.T) {
 
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("redis_get() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+//testing string complete
+func Test_redis_set(t *testing.T) {
+	//连接数据库
+	rdb := preparerdb(t)
+	//延迟关闭
+	defer rdb.Close()
+	//test结束后删key
+	//defer Delkey(rdb,"redis")
+	type args struct {
+		rdb *redis.Client
+		u   *User
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "Set up the data",
+			args: args{rdb: rdb, u: &User{
+				Key: "redis", val: 100,
+			}},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := redis_set(tt.args.rdb, tt.args.u); (err != nil) != tt.wantErr {
+				t.Errorf("redis_set() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TODO hash
+func Test_hash(t *testing.T) {
+	type args struct {
+		rdb *redis.Client
+		key string
+		m   map[string]interface{}
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := hash(tt.args.rdb, tt.args.key, tt.args.m); (err != nil) != tt.wantErr {
+				t.Errorf("hash() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
