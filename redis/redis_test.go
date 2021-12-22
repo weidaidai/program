@@ -88,9 +88,7 @@ func Test_redis_get(t *testing.T) {
 		{
 			name: "",
 			args: args{rdb: rdb, key: "xiaoming"},
-			want: &User{
-				Key: "xiaoming", val: "100",
-			},
+			want: &User{},
 			wantErr: false,
 		},
 	}
