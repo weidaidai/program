@@ -57,11 +57,13 @@ func Test_openclient(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+
 		t.Run(tt.name, func(t *testing.T) {
 
 			if err := openclient(tt.args.rdb); (err != nil) != tt.wantErr {
 				t.Errorf("openclient() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 		})
 	}
 }
@@ -116,7 +118,7 @@ func Test_redis_set(t *testing.T) {
 	//延迟关闭
 	defer rdb.Close()
 	//test结束后删key
-	defer Delkey(rdb,"redis")
+	defer Delkey(rdb, "redis")
 	type args struct {
 		rdb *redis.Client
 		u   *User
@@ -143,24 +145,35 @@ func Test_redis_set(t *testing.T) {
 }
 
 // TODO hash
-func Test_hash(t *testing.T) {
-	type args struct {
-		rdb *redis.Client
-		key string
-		m   map[string]interface{}
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := hash(tt.args.rdb, tt.args.key, tt.args.m); (err != nil) != tt.wantErr {
-				t.Errorf("hash() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
+//func Test_hash(t *testing.T) {
+//	//连接数据库
+//	rdb := preparerdb(t)
+//	//延迟关闭
+//	defer rdb.Close()
+//	//test结束后删key
+//	defer Delkey(rdb,"")
+//
+//
+//	type args struct {
+//		rdb *redis.Client
+//		key string
+//		m   map[string]interface{}
+//	}
+//	tests := []struct {
+//		name    string
+//		args    args
+//		wantErr bool
+//	}{
+//		{name: "hash the data",
+//			args: args{rdb: rdb, m:}},
+//			wantErr: false,
+//		},
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			if err := hash(tt.args.rdb, tt.args.key, tt.args.m); (err != nil) != tt.wantErr {
+//				t.Errorf("hash() error = %v, wantErr %v", err, tt.wantErr)
+//			}
+//		})
+//	}
+//}

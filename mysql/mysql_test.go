@@ -60,10 +60,10 @@ func Test_openDB(t *testing.T) {
 				t.Errorf("openDB() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if (gotDb != nil) != tt.wantDb {
-				t.Errorf("openDB() gotDb = %v, want %v", gotDb, tt.wantDb)
+			if gotDb != nil {
+				gotDb.Close()
 			}
-			gotDb.Close()
+
 		})
 	}
 }
@@ -81,9 +81,8 @@ func Test_dropTable(t *testing.T) {
 		if err := dropTable(db); (err != nil) != wantErr {
 			t.Errorf("dropTable() error = %v, wantErr %v", err, wantErr)
 		}
-		prepareTable(t, db)
 		_, err2 := listAllStudents(db)
-		if err2 != nil {
+		if err2 == nil {
 			t.Error(err2)
 		}
 	})
@@ -154,7 +153,6 @@ func Test_saveStudent(t *testing.T) {
 			Age:  22,
 		}
 		insertTestStudent(t, db, s)
-
 		wantErr := true
 		if err := saveStudent(db, s); (err != nil) != wantErr {
 			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
@@ -200,8 +198,8 @@ func Test_updateStudent(t *testing.T) {
 			Name: "weidongqi2",
 			Age:  33,
 		}
-		wantErr := true
-		if err := updateStudent(db, s2); (err == nil) != wantErr {
+		wantErr := false
+		if err := updateStudent(db, s2); (err != nil) != wantErr {
 			t.Errorf("updateStudent() error = %v, wantErr %v", err, wantErr)
 		}
 	})
@@ -219,7 +217,7 @@ func Test_deleteStudent(t *testing.T) {
 		s1 := &Student{Id: 1, Name: "weidongqi", Age: 22}
 		insertTestStudent(t, db, s1)
 
-		wantErr := true
+		wantErr := false
 		if err := deleteStudent(db, 1); (err != nil) != wantErr {
 			t.Errorf("deleteStudent() error = %v, wantErr %v", err, wantErr)
 		}
@@ -227,7 +225,7 @@ func Test_deleteStudent(t *testing.T) {
 		if err2 != nil {
 			t.Error(err2)
 		}
-		if s2 != nil {
+		if s2 == nil {
 			t.Errorf("getStudentById() got = %v, want %v", s2, nil)
 		}
 	})

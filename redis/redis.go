@@ -1,9 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis" //自带原生连接池
-	"log"
 	"time"
 )
 
@@ -30,7 +30,6 @@ func redis_set(rdb *redis.Client, u *User) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("string set up successfully")
 	return err
 }
 
@@ -53,7 +52,6 @@ func hash(rdb *redis.Client, key string, m map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Hash set up successfully")
 
 	return err
 
@@ -85,9 +83,7 @@ func list(rdb *redis.Client, l *liststudent) error {
 		return err
 	}
 	if num <= 0 {
-		log.Fatalln("list failed")
-	} else if num > 0 {
-		fmt.Println("list set up successfully ")
+		errors.New("list failed")
 	}
 
 	return err
@@ -118,11 +114,8 @@ func Set_student(rdb *redis.Client, student *set_student) error {
 		return err
 	}
 	if num <= 0 {
-		log.Fatalln("set failed")
-	} else if num > 0 {
-		fmt.Println("Set set up successfully")
+		errors.New("set failed")
 	}
-
 	return nil
 }
 func Smembers(rdb *redis.Client, key string) ([]*set_student, error) {
@@ -156,9 +149,7 @@ func zset(rdb *redis.Client, key string, l *zset_sm) error {
 		return err
 	}
 	if num <= 0 {
-		log.Fatalln("zset failed")
-	} else if num > 0 {
-		fmt.Println("zset set up successfully")
+		errors.New("zset key failed")
 	}
 
 	return err
@@ -184,9 +175,7 @@ func Delkey(rdb *redis.Client, key string) error {
 		return err
 	}
 	if num <= 0 {
-		log.Fatalln("key delete failed")
-	} else if num > 0 {
-		println("delete succeed")
+		errors.New("key delete failed")
 	}
 	return err
 }
@@ -216,10 +205,10 @@ func main() {
 	fmt.Println("Connection successful")
 	//记得释放资源
 	defer rdb.Close()
-	redis_get(rdb, "kkk")
-	u := &User{Key: "kkk", val: 555, time: 0}
-	redis_set(rdb, u)
-	//gethash(rdb,"class")
+	//redis_get(rdb, "kkk")
+	//u := &User{Key: "kkk", val: 555, time: 0}
+	//redis_set(rdb, u)
+	////gethash(rdb,"class")
 	//zset()
 	//var hashdata = make(map[string]interface{})
 	//hashdata  = make(map[string]interface{})

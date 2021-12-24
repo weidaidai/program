@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql" //database/sql仅提供基本的接口，还需指定一个第三方的数据库
+	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -38,7 +39,6 @@ func dropTable(db *sql.DB) error {
 		fmt.Println(err)
 		return err
 	}
-	fmt.Println("Table drop successfully")
 	return nil
 }
 
@@ -57,18 +57,15 @@ func createStudentTable(db *sql.DB) error {
 		return err
 	}
 
-	fmt.Println("Table created successfully")
-
 	return nil
 }
 
 // TODO 保存Student
 func saveStudent(db *sql.DB, s *Student) error {
 	sqlStr := "insert into Student(Id,NAME,Age)values(?,?,?)"
-
 	_, err := db.Exec(sqlStr, &s.Id, &s.Name, &s.Age)
 	if err == sql.ErrNoRows {
-		panic(err)
+		errors.New("save failed")
 	} else {
 		fmt.Println(s.Id, s.Name, s.Age)
 	}
@@ -80,21 +77,14 @@ func saveStudent(db *sql.DB, s *Student) error {
 func deleteStudent(db *sql.DB, id int) error {
 	sqlStr := "delete from Student where Id=?"
 	row, err := db.Exec(sqlStr, id)
-	//if err == sql.ErrNoRows {
-	//	panic(err)
-	//} else {
-	//	fmt.Println(id)
-	//}
+
 	r, err := row.RowsAffected()
 	if err != nil {
 		return err
 	}
 	if r <= 0 {
 		//panic(err)
-		fmt.Println("Data has been deleted or does not exist")
-	} else if r > 0 {
-		fmt.Println(r)
-
+		errors.New("NO data delete")
 	}
 	return err
 
@@ -109,24 +99,13 @@ func updateStudent(db *sql.DB, s *Student) error {
 	if err != nil {
 		return err
 	}
-	//if err == sql.ErrNoRows {
-	//	panic(err)
-	//} else {
-	//	fmt.Println(s.Id, s.Name, s.Age)
-	//}
-
 	r, err := row.RowsAffected()
 	if err != nil {
 		return err
 	}
 	if r <= 0 {
-		panic(err)
-		fmt.Println("Update the same data or data does not exist")
-	} else if r > 0 {
-		fmt.Println(r)
-		fmt.Println(&s.Name, &s.Age, &s.Id)
+		errors.New("Update the same data or data does not exist")
 	}
-
 	return err
 }
 
@@ -136,7 +115,7 @@ func getStudentById(db *sql.DB, id int) (*Student, error) {
 	var U = &Student{}
 	err := db.QueryRow(sqlStr, id).Scan(&U.Id, &U.Name, &U.Age)
 	if err == sql.ErrNoRows {
-		panic(err)
+		errors.New("no row get")
 	} else {
 		fmt.Println(U.Id, U.Name, U.Age)
 	}
@@ -171,7 +150,6 @@ func listAllStudents(db *sql.DB) ([]*Student, error) {
 
 	return u, err
 }
-
 func main() {
 	db, err := openDB("root:123456@tcp(127.0.0.1:3306)/sql_domo?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
