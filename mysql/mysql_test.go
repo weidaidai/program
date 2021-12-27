@@ -8,7 +8,7 @@ import (
 )
 
 func prepareDB(t *testing.T) *sql.DB {
-	dsn := "root:123456@tcp(127.0.0.1:3306)/sql_domo"
+	dsn := "root:123456@tcp(127.0.0.1:3306)/sql_test"
 	db, err := openDB(dsn)
 	if err != nil {
 		t.Error(err)

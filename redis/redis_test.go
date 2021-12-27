@@ -10,7 +10,7 @@ func preparerdb(t *testing.T) *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "127.0.0.1:6379",
 		Password: "",
-		DB:       0,
+		DB:       1,
 		PoolSize: 100,
 	})
 	err := openclient(rdb)
@@ -74,7 +74,7 @@ func Test_redis_get(t *testing.T) {
 	rdb := preparerdb(t)
 	defer rdb.Close()
 	//test结束后删key
-	defer Delkey(rdb, "xiaoming")
+	//defer Delkey(rdb, "xiaoming")
 	//插入数据
 	u := &User{Key: "xiaoming", val: "100", time: 0}
 	redis_set(rdb, u)
@@ -118,7 +118,7 @@ func Test_redis_set(t *testing.T) {
 	//延迟关闭
 	defer rdb.Close()
 	//test结束后删key
-	defer Delkey(rdb, "redis")
+	//defer Delkey(rdb, "redis")
 	type args struct {
 		rdb *redis.Client
 		u   *User
@@ -144,36 +144,37 @@ func Test_redis_set(t *testing.T) {
 	}
 }
 
-// TODO hash
-//func Test_hash(t *testing.T) {
-//	//连接数据库
-//	rdb := preparerdb(t)
-//	//延迟关闭
-//	defer rdb.Close()
-//	//test结束后删key
-//	defer Delkey(rdb,"")
-//
-//
-//	type args struct {
-//		rdb *redis.Client
-//		key string
-//		m   map[string]interface{}
-//	}
-//	tests := []struct {
-//		name    string
-//		args    args
-//		wantErr bool
-//	}{
-//		{name: "hash the data",
-//			args: args{rdb: rdb, m:}},
-//			wantErr: false,
-//		},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			if err := hash(tt.args.rdb, tt.args.key, tt.args.m); (err != nil) != tt.wantErr {
-//				t.Errorf("hash() error = %v, wantErr %v", err, tt.wantErr)
-//			}
-//		})
-//	}
-//}
+
+func Test_hash(t *testing.T) {
+	//连接数据库
+	rdb := preparerdb(t)
+	//延迟关闭
+	defer rdb.Close()
+	//test结束后删key
+	//defer Delkey(rdb,"")
+
+
+	type args struct {
+		rdb *redis.Client
+		key string
+		m   map[string]interface{}
+	}
+
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "hash the data",
+			args: args{rdb: rdb, key: "classtwo",  m: map[string]interface{}{["id"]=1,["name"]="apple",["age"]=18,}},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := hash(tt.args.rdb, tt.args.key, tt.args.m); (err != nil) != tt.wantErr {
+				t.Errorf("hash() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

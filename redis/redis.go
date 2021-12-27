@@ -13,7 +13,7 @@ func openclient(rdb *redis.Client) (err error) {
 
 	_, err = rdb.Ping().Result()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	return err
 }
@@ -200,34 +200,33 @@ func main() {
 	})
 	err := openclient(rdb)
 	if err != nil {
-		panic(err)
+		return
 	}
 	fmt.Println("Connection successful")
 	//记得释放资源
 	defer rdb.Close()
-	//redis_get(rdb, "kkk")
-	//u := &User{Key: "kkk", val: 555, time: 0}
-	//redis_set(rdb, u)
-	////gethash(rdb,"class")
-	//zset()
-	//var hashdata = make(map[string]interface{})
+	redis_get(rdb, "kkk")
+	u := &User{Key: "kkk", val: 555, time: 0}
+	redis_set(rdb, u)
+	//gethash(rdb,"class")
+	var hashdata = make(map[string]interface{})
 	//hashdata  = make(map[string]interface{})
-	//hashdata ["id"] = 1
-	//hashdata ["name"] = "小明"
-	//hashdata ["age"] = 18
-	//hash(rdb,"class",hashdata)
-	//L:=&liststudent{key:"lst",val: "redis"}
-	//list(rdb,L)
-	//lrang(rdb,"lst",0,3)
-	//student:=&set_student{key:"settttt",val: "shan"}
-	//Set_student(rdb,student)
-	//Smembers(rdb,"settttt")
-	//zranges(rdb, "database", 1, -1)
-	//zset_1:=&zset_sm{100,"数学"}
-	//zset_2:=&zset_sm{90,"语文"}
-	//zset(rdb,"database",zset_1)
-	//zset(rdb,"database",zset_2)
-	//u:=&User{Key: "xiaoming",val: 100,time: 0}
-	//redis_set(rdb,u)
+	hashdata["id"] = 1
+	hashdata["name"] = "小明"
+	hashdata["age"] = 18
+	hash(rdb, "class", hashdata)
+	L := &liststudent{key: "lst", val: "redis"}
+	list(rdb, L)
+	lrang(rdb, "lst", 0, 3)
+	student := &set_student{key: "settttt", val: "shan"}
+	Set_student(rdb, student)
+	Smembers(rdb, "settttt")
+	zranges(rdb, "database", 1, -1)
+	zset_1 := &zset_sm{100, "数学"}
+	zset_2 := &zset_sm{90, "语文"}
+	zset(rdb, "database", zset_1)
+	zset(rdb, "database", zset_2)
+	u1 := &User{Key: "xiaoming", val: 100, time: 0}
+	redis_set(rdb, u1)
 
 }
