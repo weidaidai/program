@@ -67,20 +67,44 @@ func (svc *redisStudentService) GetStudent(id int) (map[string]interface{}, erro
 	if err != nil {
 		return nil, err
 	}
-	// vals是一个数组
+
 	fmt.Println(vals)
 	return nil, err
 }
 
 func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 	// TODO 用 SCAN
-	num := make([]*model.Student, 0, 10)
-	val := svc.redis.Scan(0, "*std", 10).Args()
-	//svc.redis.Keys("*").Err()
-	stu := model.Student{}
-	num = append(num, &stu)
-	fmt.Println(val)
-	return num, nil
+	//num := make([]*model.Student, 0, 10)
+	//val := svc.redis.Scan(0, "*std", 10).Args()
+	////svc.redis.Keys("*").Err()
+	//stu := model.Student{}
+	//num = append(num, &stu)
+	//fmt.Println(val)
+	//return num, nil
+	var cursor uint64
+	var n int
+	for {
+		var keys []string
+		//*扫描所有key，每次20条
+		keys, cursor, err := svc.redis.Scan(cursor, "*std", 10).Result()
+		if err != nil {
+			return nil, err
+		}
+
+		n += len(keys)
+		for _, key := range keys {
+			_, err := svc.redis.Get(key).Result()
+			if err != nil {
+				return nil, err
+			}
+			fmt.Println(key)
+		}
+		if cursor == 0 {
+			break
+		}
+
+	}
+	return nil, nil
 
 }
 

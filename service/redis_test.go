@@ -8,6 +8,7 @@ import (
 )
 
 func preparerdb(t *testing.T) *redis.Client {
+
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "127.0.0.1:6379",
 		Password: "",
@@ -40,7 +41,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 				redis: preparerdb(t)},
 			args: args{
 				std: &model.Student{
-					Id:   1,
+					Id:   7,
 					Name: "小新",
 					Age:  18,
 				},
@@ -52,7 +53,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 				redis: preparerdb(t)},
 			args: args{
 				std: &model.Student{
-					Id:   7,
+					Id:   788,
 					Name: "小新xing",
 					Age:  18,
 				},
@@ -185,9 +186,11 @@ func Test_redisStudentService_GetStudent(t *testing.T) {
 }
 
 func Test_redisStudentService_ListStudents(t *testing.T) {
+
 	type fields struct {
 		redis *redis.Client
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -195,11 +198,11 @@ func Test_redisStudentService_ListStudents(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "get row 10",
+			name: "get key 10",
 			fields: fields{
 				redis: preparerdb(t),
 			},
-			want:    []*model.Student{},
+
 			wantErr: false,
 		},
 	}
