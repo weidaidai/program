@@ -202,6 +202,7 @@ func Test_redisStudentService_ListStudents(t *testing.T) {
 			fields: fields{
 				redis: preparerdb(t),
 			},
+			want: []*model.Student{},
 
 			wantErr: false,
 		},

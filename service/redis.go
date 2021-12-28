@@ -81,19 +81,21 @@ func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 	//num = append(num, &stu)
 	//fmt.Println(val)
 	//return num, nil
+	s := &model.Student{}
+	U := make([]*model.Student, 0, 10)
 	var cursor uint64
 	var n int
 	for {
 		var keys []string
-		//*扫描所有key，每次20条
-		keys, cursor, err := svc.redis.Scan(cursor, "*std", 10).Result()
+		//*扫描所有key，每次10条
+		keys, cursor, err := svc.redis.Scan(cursor, "std*", 10).Result()
 		if err != nil {
 			return nil, err
 		}
 
 		n += len(keys)
 		for _, key := range keys {
-			_, err := svc.redis.Get(key).Result()
+			_, err := svc.redis.HGetAll(key).Result()
 			if err != nil {
 				return nil, err
 			}
@@ -102,14 +104,13 @@ func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 		if cursor == 0 {
 			break
 		}
-
+		U = append(U, s)
 	}
-	return nil, nil
+	return U, nil
 
 }
 
 func openclient(rdb *redis.Client) (err error) {
-
 	_, err = rdb.Ping().Result()
 	if err != nil {
 		return err
