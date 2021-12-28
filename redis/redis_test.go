@@ -144,7 +144,6 @@ func Test_redis_set(t *testing.T) {
 	}
 }
 
-
 func Test_hash(t *testing.T) {
 	//连接数据库
 	rdb := preparerdb(t)
@@ -152,7 +151,6 @@ func Test_hash(t *testing.T) {
 	defer rdb.Close()
 	//test结束后删key
 	//defer Delkey(rdb,"")
-
 
 	type args struct {
 		rdb *redis.Client
@@ -166,7 +164,7 @@ func Test_hash(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "hash the data",
-			args: args{rdb: rdb, key: "classtwo",  m: map[string]interface{}{["id"]=1,["name"]="apple",["age"]=18,}},
+			args:    args{rdb: rdb, key: "classtwo", m: map[string]interface{}{"id": 1, "name": "apple", "age": 18}},
 			wantErr: false,
 		},
 	}
