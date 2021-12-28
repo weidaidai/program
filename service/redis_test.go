@@ -23,7 +23,8 @@ func preparerdb(t *testing.T) *redis.Client {
 }
 
 func Test_redisStudentService_SaveStudent(t *testing.T) {
-
+	rdb := preparerdb(t)
+	defer rdb.Close()
 	type fields struct {
 		redis *redis.Client
 	}
@@ -41,7 +42,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 				redis: preparerdb(t)},
 			args: args{
 				std: &model.Student{
-					Id:   7,
+					Id:   1,
 					Name: "小新",
 					Age:  18,
 				},
@@ -53,7 +54,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 				redis: preparerdb(t)},
 			args: args{
 				std: &model.Student{
-					Id:   788,
+					Id:   8,
 					Name: "小新xing",
 					Age:  18,
 				},
@@ -71,9 +72,11 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 			}
 		})
 	}
+
 }
 
 func Test_redisStudentService_UpdateStudent(t *testing.T) {
+
 	type fields struct {
 		redis *redis.Client
 	}

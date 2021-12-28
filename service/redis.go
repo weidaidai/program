@@ -84,7 +84,7 @@ func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 	s := &model.Student{}
 	U := make([]*model.Student, 0, 10)
 	var cursor uint64
-	var n int
+
 	for {
 		var keys []string
 		//*扫描所有key，每次10条
@@ -93,7 +93,6 @@ func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 			return nil, err
 		}
 
-		n += len(keys)
 		for _, key := range keys {
 			_, err := svc.redis.HGetAll(key).Result()
 			if err != nil {
