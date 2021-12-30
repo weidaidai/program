@@ -1,9 +1,7 @@
 package model
 
 type Student struct {
-	Id   int
-	Name string
-	Age  int
-	//mtx     sync.Mutex
-	//counter int
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
 }
