@@ -59,7 +59,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 				redis: preparerdb(t)},
 			args: args{
 				std: &model.Student{
-					Id:   11,
+					Id:   15,
 					Name: "小新xing",
 					Age:  18,
 				},

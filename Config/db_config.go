@@ -1,6 +1,10 @@
 package Config
 
-import "database/sql"
+import (
+	"database/sql"
+
+	_ "github.com/go-sql-driver/mysql"
+)
 
 // 定义一个初始化数据库的函数
 func OpenDB(dsn string) (*sql.DB, error) {

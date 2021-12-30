@@ -11,11 +11,10 @@ func Router() *gin.Engine {
 	controller := controller.Newstucontrollers()
 	s := r.Group("/student")
 	{
-		s.PUT("/save")
+		s.PUT("/save", controller.Save)
 		s.GET("/select", controller.Get)
-		s.POST("/update")
-		s.DELETE("/delete")
-		s.GET("/getall")
+		s.POST("/update", controller.Update)
+		s.DELETE("/delete", controller.Delete)
 	}
 	return r
 }

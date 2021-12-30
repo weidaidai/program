@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"program/api"
 	"program/database"
 	"program/model"
 	"strconv"
@@ -34,8 +33,8 @@ func (c *contorller) Get(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
-	println(num)
-	ctx.JSON(http.StatusOK, gin.H{"success": "200"})
+
+	ctx.JSON(http.StatusOK, num)
 }
 
 func (c *contorller) Update(ctx *gin.Context) {
@@ -46,7 +45,7 @@ func (c *contorller) Update(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
 		return
 	}
-	err := api.StudentService.SaveStudent
+	err := c.db.UpdateStudent(stu)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "404"})
 		return
@@ -62,7 +61,7 @@ func (c *contorller) Save(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
 		return
 	}
-	err := api.StudentService.SaveStudent
+	err := c.db.SaveStudent(stu)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "404"})
 		return
@@ -71,8 +70,9 @@ func (c *contorller) Save(ctx *gin.Context) {
 }
 
 func (c *contorller) Delete(ctx *gin.Context) {
-
-	err := api.StudentService.DeleteStudent
+	id := ctx.Query("id")
+	i, _ := strconv.Atoi(id)
+	err := c.db.DeleteStudent(i)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
