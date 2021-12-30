@@ -8,7 +8,7 @@ import (
 
 func Router() *gin.Engine {
 	r := gin.Default()
-	controller := controller.Newstucontrollers()
+
 	s := r.Group("/student")
 	{
 		s.PUT("/save", controller.Save)

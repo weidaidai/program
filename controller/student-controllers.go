@@ -9,26 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//controller 接口列表
-type Studentcontroller interface {
-	Get(ctx *gin.Context)
-	Update(ctx *gin.Context)
-	Save(ctx *gin.Context)
-	Delete(ctx *gin.Context)
-}
-type contorller struct {
-	db database.MysqlStudentService
-}
-
-func Newstucontrollers() Studentcontroller {
-	return &contorller{}
-}
-func (c *contorller) Get(ctx *gin.Context) {
+func Get(ctx *gin.Context) {
 	//var stu *model.Student
+	c := database.MysqlStudentService{}
 	id := ctx.Query("id")
 	i, _ := strconv.Atoi(id)
 	//获取查询参数
-	num, err := c.db.GetStudent(i)
+	num, err := c.GetStudent(i)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -37,31 +24,16 @@ func (c *contorller) Get(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, num)
 }
 
-func (c *contorller) Update(ctx *gin.Context) {
+func Update(ctx *gin.Context) {
 	// 获取传递的参数 转换成 struct
+	c := database.MysqlStudentService{}
 	var stu *model.Student
 	if err := ctx.ShouldBindJSON(&stu); err != nil {
 
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
 		return
 	}
-	err := c.db.UpdateStudent(stu)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "404"})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"success": "200"})
-}
-
-func (c *contorller) Save(ctx *gin.Context) {
-	// 获取传递的参数 转换成 struct
-	var stu *model.Student
-	if err := ctx.ShouldBindJSON(&stu); err != nil {
-
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
-		return
-	}
-	err := c.db.SaveStudent(stu)
+	err := c.UpdateStudent(stu)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "404"})
 		return
@@ -69,10 +41,28 @@ func (c *contorller) Save(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "200"})
 }
 
-func (c *contorller) Delete(ctx *gin.Context) {
+func Save(ctx *gin.Context) {
+	// 获取传递的参数 转换成 struct
+	c := database.MysqlStudentService{}
+	var stu *model.Student
+	if err := ctx.ShouldBindJSON(&stu); err != nil {
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
+		return
+	}
+	err := c.SaveStudent(stu)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "404"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "200"})
+}
+
+func Delete(ctx *gin.Context) {
+	c := database.MysqlStudentService{}
 	id := ctx.Query("id")
 	i, _ := strconv.Atoi(id)
-	err := c.db.DeleteStudent(i)
+	err := c.DeleteStudent(i)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
