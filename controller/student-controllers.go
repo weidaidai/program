@@ -10,18 +10,16 @@ import (
 )
 
 func Get(ctx *gin.Context) {
-	//var stu *model.Student
-	c := database.MysqlStudentService{}
-	id := ctx.Query("id")
+	id := ctx.Params.ByName("id")
 	i, _ := strconv.Atoi(id)
-	//获取查询参数
-	num, err := c.GetStudent(i)
+	db := database.MysqlStudentService{}
+	u, err := db.GetStudent(i)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
-		return
-	}
+		ctx.AbortWithStatus(http.StatusNotFound)
+	} else {
 
-	ctx.JSON(http.StatusOK, num)
+		ctx.JSON(http.StatusOK, u)
+	}
 }
 
 func Update(ctx *gin.Context) {
