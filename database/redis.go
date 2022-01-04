@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-redis/redis"
+	"github.com/mitchellh/mapstructure"
 )
 
 type redisStudentService struct {
@@ -14,7 +15,6 @@ type redisStudentService struct {
 }
 
 func (svc *redisStudentService) StuExist(key string) int64 {
-
 	val := svc.redis.Exists(key).Val()
 	if val != 1 {
 		return 0
@@ -60,50 +60,63 @@ func (svc *redisStudentService) UpdateStudent(std *model.Student) error {
 
 func (svc *redisStudentService) DeleteStudent(id int) error {
 	key := "std:" + strconv.Itoa(id)
-	num := svc.redis.Del(key).Val()
-	if num == 0 {
-		errors.New("del failed")
+	if svc.StuExist(key) != 1 {
+		return errors.New("no exist  ")
+	}
+	err := svc.redis.Del(key).Err()
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func (svc *redisStudentService) GetStudent(id int) (map[string]interface{}, error) {
+func (svc *redisStudentService) GetStudent(id int) (*model.Student, error) {
 	key := "std:" + strconv.Itoa(id)
-	vals, err := svc.redis.HMGet(key, "id", "name", "age").Result()
+	stu := &model.Student{}
+
+	if svc.StuExist(key) != 1 {
+		return nil, errors.New("no exist")
+	}
+	val, err := svc.redis.HGetAll(key).Result()
 	if err != nil {
 		return nil, err
 	}
+	//map 转结构体无法识别int
+	err2 := mapstructure.Decode(val, &stu)
+	if err2 != nil {
+		err2.Error()
+	}
 
-	fmt.Println(vals)
-	return nil, err
+	return stu, nil
 }
 
 func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
-
-	s := &model.Student{}
-	U := make([]*model.Student, 0, 10)
+	results := make([]*model.Student, 0, 10)
 	var cursor uint64
 
-	for {
+	for cursor > 0 {
+		stu := &model.Student{}
 		var keys []string
-		//*扫描所有key，每次10条
-		keys, cursor, err := svc.redis.Scan(cursor, "std*", 10).Result()
+		keys, cursor, err := svc.redis.Scan(cursor, "stu*", 10).Result()
 		if err != nil {
 			return nil, err
 		}
 		for _, key := range keys {
-			_, err := svc.redis.HGetAll(key).Result()
+			feild, err := svc.redis.HGetAll(key).Result()
 			if err != nil {
 				return nil, err
 			}
-			//在range
-			U = append(U, s)
-		}
 
+			err2 := mapstructure.Decode(feild, &stu)
+			if err2 != nil {
+				err2.Error()
+			}
+			results = append(results, stu)
+		}
 		if cursor == 0 {
 			break
 		}
 	}
-	return U, nil
-
+	fmt.Println(results)
+	return results, nil
 }

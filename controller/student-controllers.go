@@ -67,3 +67,15 @@ func Delete(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"status": 200})
 }
+func Create(ctx *gin.Context) {
+
+	c := database.MysqlStudentService{}
+	id := ctx.Query("id")
+	i, _ := strconv.Atoi(id)
+	err := c.DeleteStudent(i)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": 200})
+}

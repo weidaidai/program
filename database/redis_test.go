@@ -48,6 +48,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 		}
 		if err := svc.SaveStudent(s); (err != nil) != wantErr {
 			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
+
 		}
 
 	})
@@ -62,7 +63,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 			Name: "xiao",
 			Age:  18,
 		}
-		insert(t, rdb, s)
+
 		wantErr := true
 		svc := &redisStudentService{
 			redis: rdb,
@@ -102,11 +103,7 @@ func Test_redisStudentService_UpdateStudent(t *testing.T) {
 		defer rdb.FlushAll()
 		s1 := &model.Student{Id: 5, Name: "weidongqi", Age: 22}
 		insert(t, rdb, s1)
-		s := &model.Student{
-			Id:   5,
-			Name: "xiaoming",
-			Age:  18,
-		}
+		s := &model.Student{Id: 5, Name: "xiaoming", Age: 18}
 
 		wantErr := false
 		svc := &redisStudentService{
@@ -132,13 +129,13 @@ func Test_redisStudentService_DeleteStudent(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "del",
+		{name: "del not exist",
 			fields: fields{
 				redis: preparerdb(t)},
 			args: args{
 				id: 5,
 			},
-			wantErr: false,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -154,80 +151,28 @@ func Test_redisStudentService_DeleteStudent(t *testing.T) {
 }
 
 func Test_redisStudentService_GetStudent(t *testing.T) {
-	type fields struct {
-		redis *redis.Client
-	}
-	type args struct {
-		id int
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    map[string]interface{}
-		wantErr bool
-	}{
-		{name: "get",
-			fields: fields{
-				redis: preparerdb(t)},
-			args: args{
-				id: 1,
-			},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			svc := &redisStudentService{
-				redis: tt.fields.redis,
-			}
-			got, err := svc.GetStudent(tt.args.id)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetStudent() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetStudent() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
+
+	t.Run("get exist", func(t *testing.T) {
+		rdb := preparerdb(t)
+		defer rdb.Close()
+		//defer rdb.FlushAll()
+		s := &model.Student{Id: 1, Name: "xiaoxiaoxing", Age: 22}
+		insert(t, rdb, s)
+
+		wantErr := false
+		svc := &redisStudentService{
+			redis: rdb,
+		}
+		s2, err2 := svc.GetStudent(1)
+		if err2 != nil {
+			t.Errorf("saveStudent() error = %v, wantErr %v", err2, wantErr)
+		}
+		if !reflect.DeepEqual(s2, s) {
+			t.Errorf("getStudentById() got = %v, want %v", s2, s)
+		}
+	})
 }
 
 func Test_redisStudentService_ListStudents(t *testing.T) {
 
-	type fields struct {
-		redis *redis.Client
-	}
-
-	tests := []struct {
-		name    string
-		fields  fields
-		want    []*model.Student
-		wantErr bool
-	}{
-		{
-			name: "get key 10",
-			fields: fields{
-				redis: preparerdb(t),
-			},
-			want: []*model.Student{},
-
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			svc := &redisStudentService{
-				redis: tt.fields.redis,
-			}
-			got, err := svc.ListStudents()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ListStudents() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ListStudents() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
 }
