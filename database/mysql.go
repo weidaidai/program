@@ -5,7 +5,35 @@ import (
 	"errors"
 	"fmt"
 	"program/model"
+
+	_ "github.com/go-sql-driver/mysql"
 )
+
+func dropTable(db *sql.DB) error {
+	sql := "drop table Student"
+	if _, err := db.Exec(sql); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func createStudentTable(db *sql.DB) error {
+
+	TABLE := `
+            CREATE TABLE Student (
+                Id  INT AUTO_INCREMENT,
+                Name VARCHAR(50) ,
+                Age INT ,
+                PRIMARY KEY (Id)
+            );`
+	if _, err := db.Exec(TABLE); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
 
 type MysqlStudentService struct {
 	db *sql.DB
@@ -72,14 +100,14 @@ func (svc *MysqlStudentService) ListStudents() ([]*model.Student, error) {
 	for rows.Next() {
 
 		s := &model.Student{}
-		//将每一行的结果都赋值到一个s对象中
+
 		err := rows.Scan(&s.Id, &s.Name, &s.Age)
 		if err != nil {
 
 			return nil, err
 		}
 		fmt.Printf("id:%d name:%s age:%d\n", s.Id, s.Name, s.Age)
-
+		//将每一行的结果都赋值到一个u对象中
 		u = append(u, s)
 	}
 	return u, err

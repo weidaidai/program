@@ -13,43 +13,48 @@ type redisStudentService struct {
 	redis *redis.Client
 }
 
+func (svc *redisStudentService) StuExist(key string) int64 {
+
+	val := svc.redis.Exists(key).Val()
+	if val != 1 {
+		return 0
+	}
+	return 1
+}
 func (svc *redisStudentService) SaveStudent(std *model.Student) error {
 
 	key := "std:" + strconv.Itoa(std.Id)
-	if strconv.Itoa(std.Id) == svc.redis.HGet(key, "id").Val() {
+	if svc.StuExist(key) != 0 {
 		return errors.New("id repetition ")
-	} else {
-		statusCmd := svc.redis.HMSet(key, map[string]interface{}{
-			"id":   std.Id,
-			"age":  std.Age,
-			"name": std.Name,
-		})
+	}
+	statusCmd := svc.redis.HMSet(key, map[string]interface{}{
+		"id":   std.Id,
+		"age":  std.Age,
+		"name": std.Name,
+	})
 
-		if err := statusCmd.Err(); err != nil {
-			return err
-		}
+	if err := statusCmd.Err(); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (svc *redisStudentService) UpdateStudent(std *model.Student) error {
-
 	key := "std:" + strconv.Itoa(std.Id)
-	err := svc.redis.HGet(key, "id").Err()
-	if err != nil {
-		return err
-	} else {
-		statusCmd := svc.redis.HMSet(key, map[string]interface{}{
-			"id":   std.Id,
-			"age":  std.Age,
-			"name": std.Name,
-		})
-
-		if err := statusCmd.Err(); err != nil {
-			return err
-		}
+	if svc.StuExist(key) != 1 {
+		return errors.New("no exist  ")
 	}
+	statusCmd := svc.redis.HMSet(key, map[string]interface{}{
+		"id":   std.Id,
+		"age":  std.Age,
+		"name": std.Name,
+	})
+
+	if err := statusCmd.Err(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -74,7 +79,6 @@ func (svc *redisStudentService) GetStudent(id int) (map[string]interface{}, erro
 }
 
 func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
-	// TODO 用 SCAN
 
 	s := &model.Student{}
 	U := make([]*model.Student, 0, 10)
@@ -92,21 +96,14 @@ func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 			if err != nil {
 				return nil, err
 			}
-			fmt.Println(key)
+			//在range
+			U = append(U, s)
 		}
+
 		if cursor == 0 {
 			break
 		}
-		U = append(U, s)
 	}
 	return U, nil
 
-}
-
-func openclient(rdb *redis.Client) (err error) {
-	_, err = rdb.Ping().Result()
-	if err != nil {
-		return err
-	}
-	return err
 }

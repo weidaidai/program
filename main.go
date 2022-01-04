@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"program/Config"
 	"program/routers"
 )
@@ -11,7 +10,7 @@ func main() {
 	if err != nil {
 		return
 	}
-	fmt.Println("Connection successful")
+
 	//释放资源
 	defer db.Close()
 	r := routers.Router()
