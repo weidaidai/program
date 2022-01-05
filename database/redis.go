@@ -21,6 +21,7 @@ func (svc *redisStudentService) StuExist(key string) bool {
 	return true
 
 }
+
 func (svc *redisStudentService) SaveStudent(std *model.Student) error {
 
 	key := "std:" + strconv.Itoa(std.Id)
@@ -102,7 +103,6 @@ func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 	var cursor uint64
 
 	for {
-
 		keys, cursor, err := svc.redis.Scan(cursor, "std:*", 10).Result()
 		if err != nil {
 			return nil, err
@@ -117,6 +117,7 @@ func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 				return nil, err
 			}
 			results = append(results, std)
+
 		}
 		if cursor == 0 {
 			break

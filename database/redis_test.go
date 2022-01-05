@@ -175,7 +175,7 @@ func Test_redisStudentService_ListStudents(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "",
+			name: "exist",
 			args: args{rdb: rdb},
 			want: []*model.Student{
 				{Id: 1, Name: "xiaoxing", Age: 22},

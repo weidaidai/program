@@ -15,14 +15,14 @@ type MysqlStudentService struct {
 
 func (svc *MysqlStudentService) SaveStudent(std *model.Student) error {
 
-	sqlStr := "insert into Student(Id,NAME,Age)values(?,?,?)"
+	sqlStr := "INSERT INTO STUDENT(ID,NAME,AGE)VALUES (?,?,?)"
 	_, err := svc.db.Exec(sqlStr, &std.Id, &std.Name, &std.Age)
 	return err
 
 }
 
 func (svc *MysqlStudentService) UpdateStudent(std *model.Student) error {
-	sqlStr := "update Student set Name=?,age=? where Id=?"
+	sqlStr := "UPDATE STUDENT SET NAME=?,AGE=? where ID=?"
 	row, err := svc.db.Exec(sqlStr, &std.Name, &std.Age, &std.Id)
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func (svc *MysqlStudentService) UpdateStudent(std *model.Student) error {
 }
 
 func (svc *MysqlStudentService) DeleteStudent(id int) error {
-	sqlStr := "delete from Student where Id=?"
+	sqlStr := "DELETE FROM STUDENT WHERE ID=?"
 	row, err := svc.db.Exec(sqlStr, id)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (svc *MysqlStudentService) DeleteStudent(id int) error {
 }
 
 func (svc *MysqlStudentService) GetStudent(id int) (*model.Student, error) {
-	sqlStr := "select ID, NAME, AGE from Student where ID=?"
+	sqlStr := "SELECT ID, NAME, AGE FROM STUDENT WHERE ID=?"
 	stu := &model.Student{}
 	//var U *model.Student 尽量简短声明
 	row := svc.db.QueryRow(sqlStr, id).Scan(&stu.Id, &stu.Name, &stu.Age)
@@ -61,7 +61,7 @@ func (svc *MysqlStudentService) GetStudent(id int) (*model.Student, error) {
 
 func (svc *MysqlStudentService) ListStudents() ([]*model.Student, error) {
 	stu := make([]*model.Student, 0, 10)
-	sql := "select *from Student"
+	sql := "SELECT * FROM STUDENT"
 	rows, err := svc.db.Query(sql)
 	if err != nil {
 		return nil, err
@@ -80,11 +80,11 @@ func (svc *MysqlStudentService) ListStudents() ([]*model.Student, error) {
 	return stu, err
 }
 func (svc *MysqlStudentService) createStudentTable() error {
-	TABLE := `CREATE TABLE Student (
-                Id  INT AUTO_INCREMENT,
-                Name VARCHAR(50) ,
-                Age INT ,
-                PRIMARY KEY (Id)
+	TABLE := `CREATE TABLE STUDENT  (
+                ID  INT AUTO_INCREMENT,
+                NAME VARCHAR(50) ,
+                AGE INT ,
+                PRIMARY KEY (ID)
             );`
 	if _, err := svc.db.Exec(TABLE); err != nil {
 		fmt.Println(err)
@@ -94,7 +94,7 @@ func (svc *MysqlStudentService) createStudentTable() error {
 
 }
 func (svc *MysqlStudentService) dropTable() error {
-	sql := "drop table Student"
+	sql := "DROP TABLE STUDENT "
 	if _, err := svc.db.Exec(sql); err != nil {
 		fmt.Println(err)
 		return err
