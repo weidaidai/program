@@ -131,7 +131,7 @@ func TestMysqlStudentService_ListStudents(t *testing.T) {
 func TestMysqlStudentService_SaveStudent(t *testing.T) {
 
 	t.Run("save not exist", func(t *testing.T) {
-		//连接数据库
+
 		db := prepareDB(t)
 
 		defer db.Close()

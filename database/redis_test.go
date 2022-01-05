@@ -155,7 +155,7 @@ func Test_redisStudentService_GetStudent(t *testing.T) {
 	t.Run("get exist", func(t *testing.T) {
 		rdb := preparerdb(t)
 		defer rdb.Close()
-		//defer rdb.FlushAll()
+		defer rdb.FlushAll()
 		s := &model.Student{Id: 1, Name: "xiaoxiaoxing", Age: 22}
 		insert(t, rdb, s)
 
@@ -175,4 +175,46 @@ func Test_redisStudentService_GetStudent(t *testing.T) {
 
 func Test_redisStudentService_ListStudents(t *testing.T) {
 
+	rdb := preparerdb(t)
+	defer rdb.Close()
+	defer rdb.FlushAll()
+	svc := &redisStudentService{
+		redis: rdb,
+	}
+	//插入数据
+	s1 := &model.Student{Id: 1, Name: "xiaoxing", Age: 22}
+	s2 := &model.Student{Id: 2, Name: "xiaoxing", Age: 33}
+	svc.SaveStudent(s1)
+	svc.SaveStudent(s2)
+	type args struct {
+		rdb *redis.Client
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []*model.Student
+		wantErr bool
+	}{
+		{
+			name: "",
+			args: args{rdb: rdb},
+			want: []*model.Student{
+				{Id: 1, Name: "xiaoxing", Age: 22},
+				{Id: 2, Name: "xiaoxing", Age: 33},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := svc.ListStudents()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("listAllStudents() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("listAllStudents() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

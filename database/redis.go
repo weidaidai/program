@@ -106,7 +106,6 @@ func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			err2 := mapstructure.Decode(feild, &stu)
 			if err2 != nil {
 				err2.Error()
