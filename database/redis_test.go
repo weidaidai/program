@@ -37,18 +37,13 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 		rdb := preparerdb(t)
 		defer rdb.Close()
 		defer rdb.FlushAll()
-		s := &model.Student{
-			Id:   1,
-			Name: "xiao",
-			Age:  18,
-		}
+		s := &model.Student{Id: 12, Name: "xiao", Age: 18}
 		wantErr := false
 		svc := &redisStudentService{
 			redis: rdb,
 		}
 		if err := svc.SaveStudent(s); (err != nil) != wantErr {
 			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
-
 		}
 
 	})
@@ -117,37 +112,21 @@ func Test_redisStudentService_UpdateStudent(t *testing.T) {
 }
 
 func Test_redisStudentService_DeleteStudent(t *testing.T) {
-	type fields struct {
-		redis *redis.Client
-	}
-	type args struct {
-		id int
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		{name: "del not exist",
-			fields: fields{
-				redis: preparerdb(t)},
-			args: args{
-				id: 5,
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			svc := &redisStudentService{
-				redis: tt.fields.redis,
-			}
-			if err := svc.DeleteStudent(tt.args.id); (err != nil) != tt.wantErr {
-				t.Errorf("DeleteStudent() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
+	t.Run("del exist", func(t *testing.T) {
+		rdb := preparerdb(t)
+		defer rdb.Close()
+		defer rdb.FlushAll()
+		s := &model.Student{Id: 1, Name: "xiaoxiaoxing", Age: 22}
+		insert(t, rdb, s)
+
+		wantErr := false
+		svc := &redisStudentService{
+			redis: rdb,
+		}
+		if err := svc.DeleteStudent(1); (err != nil) != wantErr {
+			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
+		}
+	})
 }
 
 func Test_redisStudentService_GetStudent(t *testing.T) {

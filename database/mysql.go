@@ -17,9 +17,6 @@ func (svc *MysqlStudentService) SaveStudent(std *model.Student) error {
 
 	sqlStr := "insert into Student(Id,NAME,Age)values(?,?,?)"
 	_, err := svc.db.Exec(sqlStr, &std.Id, &std.Name, &std.Age)
-	if err == sql.ErrNoRows {
-		errors.New("save failed")
-	}
 	return err
 
 }
@@ -79,12 +76,11 @@ func (svc *MysqlStudentService) ListStudents() ([]*model.Student, error) {
 		}
 		stu = append(stu, s)
 	}
-	//fmt.Printf("%#v", u)
+
 	return stu, err
 }
 func (svc *MysqlStudentService) createStudentTable() error {
-	TABLE := `
-            CREATE TABLE Student (
+	TABLE := `CREATE TABLE Student (
                 Id  INT AUTO_INCREMENT,
                 Name VARCHAR(50) ,
                 Age INT ,
