@@ -39,7 +39,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 		defer rdb.FlushAll()
 		s := &model.Student{Id: 12, Name: "xiao", Age: 18}
 		wantErr := false
-		svc := &redisStudentService{
+		svc := &RedisStudentService{
 			redis: rdb,
 		}
 		if err := svc.SaveStudent(s); (err != nil) != wantErr {
@@ -60,7 +60,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 		}
 
 		wantErr := true
-		svc := &redisStudentService{
+		svc := &RedisStudentService{
 			redis: rdb,
 		}
 		if err := svc.SaveStudent(s); (err != nil) != wantErr {
@@ -83,7 +83,7 @@ func Test_redisStudentService_UpdateStudent(t *testing.T) {
 			Age:  18,
 		}
 		wantErr := true
-		svc := &redisStudentService{
+		svc := &RedisStudentService{
 			redis: rdb,
 		}
 		if err := svc.UpdateStudent(s); (err != nil) != wantErr {
@@ -101,7 +101,7 @@ func Test_redisStudentService_UpdateStudent(t *testing.T) {
 		s := &model.Student{Id: 5, Name: "xiaoming", Age: 18}
 
 		wantErr := false
-		svc := &redisStudentService{
+		svc := &RedisStudentService{
 			redis: rdb,
 		}
 		if err := svc.UpdateStudent(s); (err != nil) != wantErr {
@@ -118,9 +118,8 @@ func Test_redisStudentService_DeleteStudent(t *testing.T) {
 		defer rdb.FlushAll()
 		s := &model.Student{Id: 1, Name: "xiaoxiaoxing", Age: 22}
 		insert(t, rdb, s)
-
 		wantErr := false
-		svc := &redisStudentService{
+		svc := &RedisStudentService{
 			redis: rdb,
 		}
 		if err := svc.DeleteStudent(1); (err != nil) != wantErr {
@@ -139,7 +138,7 @@ func Test_redisStudentService_GetStudent(t *testing.T) {
 		insert(t, rdb, s)
 
 		wantErr := false
-		svc := &redisStudentService{
+		svc := &RedisStudentService{
 			redis: rdb,
 		}
 		s2, err2 := svc.GetStudent(1)
@@ -157,7 +156,7 @@ func Test_redisStudentService_ListStudents(t *testing.T) {
 	rdb := preparerdb(t)
 	defer rdb.Close()
 	defer rdb.FlushAll()
-	svc := &redisStudentService{
+	svc := &RedisStudentService{
 		redis: rdb,
 	}
 	//插入数据

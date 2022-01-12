@@ -1,0 +1,162 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: student information
+  description: Simple Student Information API
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://app.swaggerhub.com/apis/weidaidai/student/1.0.0++
+paths:
+  /student:
+    post:
+      description: Add student information
+      requestBody:
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/InventoryItem'
+      responses:
+
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    example:  {
+                      message: ok
+                    }
+                  success:
+                    type: boolean
+                    example: true
+        400:
+          description: Invalid userid supplied
+        404:
+          description:  not found
+        405:
+            description: Invalid input
+
+
+  '/student/{Id}':
+    description: updata_student
+    put:
+      description: we can update student information.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryItem'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    example:  {
+                      message: ok
+                    }
+                  success:
+                    type: boolean
+                    example: true
+        404:
+          description: User not found
+        400:
+            description: Invalid ID supplied
+
+    get:
+      description: Get  student information by id
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+
+
+        400:
+          description: Invalid userid supplied
+        404:
+          description: User not found
+
+    delete:
+      description: delete student by id
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    example:  {
+                      message: ok
+                    }
+                  success:
+                    type: boolean
+                    example: true
+
+        400:
+          description: Invalid userid supplied
+        404:
+          description: User not found
+
+  '/student/list':
+    description: Get all student information
+    get:
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        age:
+                          type: integer
+                  example: []
+                  success:
+                    type: boolean
+                    example: true
+        404:
+          description: User not found
+
+
+components:
+  schemas:
+    InventoryItem:
+      type: object
+      required:
+        - id
+        - name
+        - age
+      properties:
+        id:
+          type: integer
+          example: 0
+        name:
+          type: string
+          example: 'waidaidai'
+        age:
+          type: integer
+          example: 18
+

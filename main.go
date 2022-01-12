@@ -1,20 +1,26 @@
 package main
 
 import (
-	"fmt"
-	"program/Config"
-	"program/routers"
+	"program/config"
+	"program/controller"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	db, err := Config.OpenDB("root:123456@tcp(127.0.0.1:3306)/sql_test?charset=utf8&parseTime=True&loc=Local")
+	r := gin.Default()
+	db, err := config.OpenDB("root:123456@tcp(127.0.0.1:3306)/sql_test?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		return
 	}
-	fmt.Println("Connection successful")
-	//释放资源
 	defer db.Close()
-	r := routers.Router()
-	r.Run()
+
+	new := controller.Newmysql(db)
+	new.Studentrouter(r)
+
+	err = r.Run()
+	if err != nil {
+		panic(err)
+	}
 
 }

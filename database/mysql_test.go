@@ -2,7 +2,7 @@ package database
 
 import (
 	"database/sql"
-	"program/Config"
+	"program/config"
 	"program/model"
 	"reflect"
 	"testing"
@@ -10,7 +10,7 @@ import (
 
 func prepareDB(t *testing.T) *sql.DB {
 	dsn := "root:123456@tcp(127.0.0.1:3306)/sql_test"
-	db, err := Config.OpenDB(dsn)
+	db, err := config.OpenDB(dsn)
 	if err != nil {
 		t.Error(err)
 	}

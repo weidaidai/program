@@ -50,12 +50,13 @@ func (svc *MysqlStudentService) DeleteStudent(id int) error {
 func (svc *MysqlStudentService) GetStudent(id int) (*model.Student, error) {
 	sqlStr := "SELECT ID, NAME, AGE FROM STUDENT WHERE ID=?"
 	stu := &model.Student{}
-	//var U *model.Student 尽量简短声明
-	row := svc.db.QueryRow(sqlStr, id).Scan(&stu.Id, &stu.Name, &stu.Age)
-	if row == sql.ErrNoRows {
-		return nil, errors.New("no row get")
+	err := svc.db.QueryRow(sqlStr, id).Scan(&stu.Id, &stu.Name, &stu.Age)
+	if err == sql.ErrNoRows {
+		return nil, nil
 	}
-	fmt.Println(stu)
+	if err != nil {
+		return nil, nil
+	}
 	return stu, nil
 }
 
