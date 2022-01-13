@@ -15,21 +15,17 @@ paths:
         content:
           application/json:
             schema:
-               $ref: '#/components/schemas/InventoryItem'
+               $ref: '#/components/schemas/student'
       responses:
 
         200:
           description: success
+
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  data:
-                    type: object
-                    example:  {
-                      message: ok
-                    }
                   success:
                     type: boolean
                     example: true
@@ -39,17 +35,26 @@ paths:
           description:  not found
         405:
             description: Invalid input
-
-
-  '/student/{Id}':
     description: updata_student
     put:
       description: we can update student information.
+      parameters:
+        - name: Id
+          in: path
+          schema:
+            type: integer
+          required: true
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InventoryItem'
+              type: object
+              properties:
+                name:
+                  type: string
+                age:
+                  type: integer
+
       responses:
         200:
           description: success
@@ -58,28 +63,36 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
-                    type: object
-                    example:  {
-                      message: ok
-                    }
                   success:
                     type: boolean
                     example: true
         404:
           description: User not found
         400:
-            description: Invalid ID supplied
+          description: Invalid ID supplied
 
+
+  '/student/{Id}':
     get:
       description: Get  student information by id
+      parameters:
+        - name: Id
+          in: path
+          schema:
+            type: integer
+          required: true
       responses:
         200:
           description: success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InventoryItem'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                   $ref: '#/components/schemas/student'
 
 
         400:
@@ -89,6 +102,12 @@ paths:
 
     delete:
       description: delete student by id
+      parameters:
+        - name: Id
+          in: path
+          schema:
+            type: integer
+          required: true
       responses:
         200:
           description: success
@@ -97,11 +116,6 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
-                    type: object
-                    example:  {
-                      message: ok
-                    }
                   success:
                     type: boolean
                     example: true
@@ -133,7 +147,6 @@ paths:
                           type: string
                         age:
                           type: integer
-                  example: []
                   success:
                     type: boolean
                     example: true
@@ -143,7 +156,7 @@ paths:
 
 components:
   schemas:
-    InventoryItem:
+    student:
       type: object
       required:
         - id
@@ -159,4 +172,5 @@ components:
         age:
           type: integer
           example: 18
+
 

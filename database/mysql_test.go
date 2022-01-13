@@ -9,7 +9,7 @@ import (
 )
 
 func prepareDB(t *testing.T) *sql.DB {
-	dsn := "root:123456@tcp(127.0.0.1:3306)/sql_test"
+	dsn := "root:123456@tcp(127.0.0.1:3306)/sql_demo2"
 	db, err := config.OpenDB(dsn)
 	if err != nil {
 		t.Error(err)
@@ -21,7 +21,7 @@ func TestMysqlStudentService_DeleteStudent(t *testing.T) {
 
 	t.Run("del exist", func(t *testing.T) {
 		db := prepareDB(t)
-		svc := &MysqlStudentService{
+		svc := &mysqlStudentService{
 			db,
 		}
 		svc.createStudentTable()
@@ -37,29 +37,13 @@ func TestMysqlStudentService_DeleteStudent(t *testing.T) {
 		}
 
 	})
-	t.Run("del not exist", func(t *testing.T) {
-		db := prepareDB(t)
-		svc := &MysqlStudentService{
-			db,
-		}
-		svc.createStudentTable()
-		defer svc.dropTable()
-		//test结束后删表
-		wantErr := true
-
-		if err := svc.DeleteStudent(78); (err != nil) != wantErr {
-			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
-		}
-
-	})
-
 }
 
 func TestMysqlStudentService_GetStudent(t *testing.T) {
 
 	t.Run("get exist", func(t *testing.T) {
 		db := prepareDB(t)
-		svc := &MysqlStudentService{
+		svc := &mysqlStudentService{
 			db,
 		}
 		svc.createStudentTable()
@@ -83,7 +67,7 @@ func TestMysqlStudentService_ListStudents(t *testing.T) {
 
 	db := prepareDB(t)
 	defer db.Close()
-	svc := &MysqlStudentService{
+	svc := &mysqlStudentService{
 		db,
 	}
 	svc.createStudentTable()
@@ -135,7 +119,7 @@ func TestMysqlStudentService_SaveStudent(t *testing.T) {
 		db := prepareDB(t)
 
 		defer db.Close()
-		svc := &MysqlStudentService{
+		svc := &mysqlStudentService{
 			db,
 		}
 		svc.createStudentTable()
@@ -164,7 +148,7 @@ func TestMysqlStudentService_SaveStudent(t *testing.T) {
 		//连接数据库
 		db := prepareDB(t)
 		defer db.Close()
-		svc := &MysqlStudentService{
+		svc := &mysqlStudentService{
 			db,
 		}
 		//创表
@@ -191,7 +175,7 @@ func TestMysqlStudentService_UpdateStudent(t *testing.T) {
 	t.Run("update not exist", func(t *testing.T) {
 		//连接数据库
 		db := prepareDB(t)
-		svc := &MysqlStudentService{
+		svc := &mysqlStudentService{
 			db,
 		}
 		svc.createStudentTable()
@@ -214,7 +198,7 @@ func TestMysqlStudentService_UpdateStudent(t *testing.T) {
 		db := prepareDB(t)
 
 		//defer db.Close()
-		svc := &MysqlStudentService{
+		svc := &mysqlStudentService{
 			db,
 		}
 		//创表

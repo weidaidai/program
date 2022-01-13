@@ -16,91 +16,135 @@ type Stucontroller interface {
 	Save(ctx *gin.Context)
 	Delete(ctx *gin.Context)
 	Getall(ctx *gin.Context)
+	Saveredis(ctx *gin.Context)
 	Studentrouter(r *gin.Engine)
 }
 
 //返回实现接口的对象
-func Newmysql() Stucontroller {
+func New(svc database.StudentService, svc2 database.StudentService) Stucontroller {
 
-	return &controller{}
+	return &studentcontroller{svc_mysql: svc, svc_redis: svc2}
 
 }
 
-type controller struct{ svc database.StudentService }
+type studentcontroller struct {
+	svc_mysql database.StudentService
+	svc_redis database.StudentService
+}
 
-func (c *controller) Studentrouter(r *gin.Engine) {
+func (c *studentcontroller) Studentrouter(r *gin.Engine) {
 
 	s := r.Group("/student")
 	s.POST("/", c.Save)
+	s.POST("/rdb", c.Saveredis)
 	s.GET("/:id", c.Get)
 	s.PUT("/", c.Update)
 	s.DELETE("/:id", c.Delete)
-	s.GET("/list_all", c.Getall)
+	s.GET("/list", c.Getall)
 
 }
 
-func (c *controller) Get(ctx *gin.Context) {
+//异步
+func (c *studentcontroller) Saveredis(ctx *gin.Context) {
+	// 获取传递的参数 转换成 struct
+	var stu *model.Student
+	if err := ctx.ShouldBindJSON(&stu); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
+	}
+	err := c.svc_redis.SaveStudent(stu)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": true})
+}
+
+func (c *studentcontroller) Get(ctx *gin.Context) {
 	id := ctx.Params.ByName("id")
 	i, err := strconv.Atoi(id)
 	if err != nil {
 		return
 	}
 	var u *model.Student
-	u, err = c.svc.GetStudent(i)
-
+	u, err = c.svc_mysql.GetStudent(i)
+	u, err = c.svc_redis.GetStudent(i)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"data": err.Error()})
 
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{"data": u})
 
 }
-func (c *controller) Getall(ctx *gin.Context) {
+func (c *studentcontroller) Getall(ctx *gin.Context) {
 	var std []*model.Student
-	std, err := c.svc.ListStudents()
+	std, err := c.svc_mysql.ListStudents()
+	std, err2 := c.svc_redis.ListStudents()
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"data": err2.Error()})
+	}
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"data": err.Error()})
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": std})
 
 }
-func (c *controller) Update(ctx *gin.Context) {
-	// 获取传递的参数 转换成 struct
-	var stu *model.Student
-	err := c.svc.UpdateStudent(stu)
-	if err := ctx.ShouldBindJSON(&stu); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
-		return
-	}
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusNotFound)
-	}
-	ctx.JSON(http.StatusOK, gin.H{"data": stu})
-}
-
-func (c *controller) Save(ctx *gin.Context) {
+func (c *studentcontroller) Update(ctx *gin.Context) {
 	// 获取传递的参数 转换成 struct
 	var stu *model.Student
 	if err := ctx.ShouldBindJSON(&stu); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
 	}
-	err := c.svc.SaveStudent(stu)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
+	err := c.svc_mysql.UpdateStudent(stu)
+	err2 := c.svc_redis.UpdateStudent(stu)
+	if err2 != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"redis_data": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": "save successfully"})
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": true})
 }
 
-func (c *controller) Delete(ctx *gin.Context) {
+func (c *studentcontroller) Save(ctx *gin.Context) {
+	// 获取传递的参数 转换成 struct
+	var stu *model.Student
+	if err := ctx.ShouldBindJSON(&stu); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
+	}
+	err := c.svc_mysql.SaveStudent(stu)
+	// 同步
+	//err2 := c.svc_redis.SaveStudent(stu)
+	//if err2 != nil {
+	//	ctx.JSON(http.StatusBadRequest, gin.H{"data": err2.Error()})
+	//	return
+	//}
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": true})
+}
+
+func (c *studentcontroller) Delete(ctx *gin.Context) {
 	id := ctx.Params.ByName("id")
 	i, err2 := strconv.Atoi(id)
 	if err2 != nil {
 		return
 	}
-	err := c.svc.DeleteStudent(i)
+	err := c.svc_mysql.DeleteStudent(i)
+	err2 = c.svc_redis.DeleteStudent(i)
+	if err2 != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"data": err2.Error()})
+		return
+	}
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": "delete successfully"})
+
+	ctx.JSON(http.StatusOK, gin.H{"success": true})
 }

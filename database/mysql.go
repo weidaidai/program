@@ -9,11 +9,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type MysqlStudentService struct {
+type mysqlStudentService struct {
 	db *sql.DB
 }
 
-func (svc *MysqlStudentService) SaveStudent(std *model.Student) error {
+func NewMySqlStudentService(db *sql.DB) StudentService {
+	return &mysqlStudentService{db: db}
+}
+
+func (svc *mysqlStudentService) SaveStudent(std *model.Student) error {
 
 	sqlStr := "INSERT INTO STUDENT(ID,NAME,AGE)VALUES (?,?,?)"
 	_, err := svc.db.Exec(sqlStr, &std.Id, &std.Name, &std.Age)
@@ -21,7 +25,7 @@ func (svc *MysqlStudentService) SaveStudent(std *model.Student) error {
 
 }
 
-func (svc *MysqlStudentService) UpdateStudent(std *model.Student) error {
+func (svc *mysqlStudentService) UpdateStudent(std *model.Student) error {
 	sqlStr := "UPDATE STUDENT SET NAME=?,AGE=? where ID=?"
 	row, err := svc.db.Exec(sqlStr, &std.Name, &std.Age, &std.Id)
 	if err != nil {
@@ -34,33 +38,30 @@ func (svc *MysqlStudentService) UpdateStudent(std *model.Student) error {
 	return err
 }
 
-func (svc *MysqlStudentService) DeleteStudent(id int) error {
+func (svc *mysqlStudentService) DeleteStudent(id int) error {
 	sqlStr := "DELETE FROM STUDENT WHERE ID=?"
-	row, err := svc.db.Exec(sqlStr, id)
+	_, err := svc.db.Exec(sqlStr, id)
 	if err != nil {
 		return err
-	}
-	r, _ := row.RowsAffected()
-	if r <= 0 {
-		return errors.New("NO data delete")
 	}
 	return nil
 }
 
-func (svc *MysqlStudentService) GetStudent(id int) (*model.Student, error) {
+func (svc *mysqlStudentService) GetStudent(id int) (*model.Student, error) {
 	sqlStr := "SELECT ID, NAME, AGE FROM STUDENT WHERE ID=?"
 	stu := &model.Student{}
 	err := svc.db.QueryRow(sqlStr, id).Scan(&stu.Id, &stu.Name, &stu.Age)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
 	if err != nil {
-		return nil, nil
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
 	}
+
 	return stu, nil
 }
 
-func (svc *MysqlStudentService) ListStudents() ([]*model.Student, error) {
+func (svc *mysqlStudentService) ListStudents() ([]*model.Student, error) {
 	stu := make([]*model.Student, 0, 10)
 	sql := "SELECT * FROM STUDENT"
 	rows, err := svc.db.Query(sql)
@@ -80,7 +81,7 @@ func (svc *MysqlStudentService) ListStudents() ([]*model.Student, error) {
 
 	return stu, err
 }
-func (svc *MysqlStudentService) createStudentTable() error {
+func (svc *mysqlStudentService) createStudentTable() error {
 	TABLE := `CREATE TABLE STUDENT  (
                 ID  INT AUTO_INCREMENT,
                 NAME VARCHAR(50) ,
@@ -94,7 +95,7 @@ func (svc *MysqlStudentService) createStudentTable() error {
 	return nil
 
 }
-func (svc *MysqlStudentService) dropTable() error {
+func (svc *mysqlStudentService) dropTable() error {
 	sql := "DROP TABLE STUDENT "
 	if _, err := svc.db.Exec(sql); err != nil {
 		fmt.Println(err)

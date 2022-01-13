@@ -8,17 +8,21 @@ import (
 	"github.com/go-redis/redis"
 )
 
-type RedisStudentService struct {
+type redisStudentService struct {
 	redis *redis.Client
 }
 
-func (svc *RedisStudentService) stuExist(key string) bool {
+func NewredisStudentService(client *redis.Client) StudentService {
+	return &redisStudentService{client}
+}
+
+func (svc *redisStudentService) stuExist(key string) bool {
 	val := svc.redis.Exists(key).Val()
 	return val == 1
 
 }
 
-func (svc *RedisStudentService) SaveStudent(std *model.Student) error {
+func (svc *redisStudentService) SaveStudent(std *model.Student) error {
 
 	key := "std:" + strconv.Itoa(std.Id)
 	if svc.stuExist(key) {
@@ -38,7 +42,7 @@ func (svc *RedisStudentService) SaveStudent(std *model.Student) error {
 	return nil
 }
 
-func (svc *RedisStudentService) UpdateStudent(std *model.Student) error {
+func (svc *redisStudentService) UpdateStudent(std *model.Student) error {
 	key := "std:" + strconv.Itoa(std.Id)
 	if !svc.stuExist(key) {
 		return errors.New("no exist  ")
@@ -56,7 +60,7 @@ func (svc *RedisStudentService) UpdateStudent(std *model.Student) error {
 	return nil
 }
 
-func (svc *RedisStudentService) DeleteStudent(id int) error {
+func (svc *redisStudentService) DeleteStudent(id int) error {
 	key := "std:" + strconv.Itoa(id)
 	err := svc.redis.Del(key).Err()
 	if err != nil {
@@ -64,17 +68,16 @@ func (svc *RedisStudentService) DeleteStudent(id int) error {
 	}
 	return nil
 }
-func (svc *RedisStudentService) getStudentbykey(key string) (*model.Student, error) {
-	var id int
-	key = "std:" + strconv.Itoa(id)
-	return svc.GetStudent(id)
-}
-func (svc *RedisStudentService) GetStudent(id int) (*model.Student, error) {
-	key := "std:" + strconv.Itoa(id)
+func (svc *redisStudentService) getStudentbykey(key string) (*model.Student, error) {
+
 	val, err := svc.redis.HGetAll(key).Result()
 	if err != nil {
 		return nil, nil
 	}
+	if len(val) == 0 {
+		return nil, nil
+	}
+
 	stu := &model.Student{}
 	stu.Id, err = strconv.Atoi(val["id"])
 	if err != nil {
@@ -88,10 +91,15 @@ func (svc *RedisStudentService) GetStudent(id int) (*model.Student, error) {
 
 	return stu, nil
 }
+func (svc *redisStudentService) GetStudent(id int) (*model.Student, error) {
+	key := "std:" + strconv.Itoa(id)
+	return svc.getStudentbykey(key)
+}
 
-func (svc *RedisStudentService) ListStudents() ([]*model.Student, error) {
+func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 
 	results := make([]*model.Student, 0, 10)
+
 	var cursor uint64
 
 	for {
@@ -99,7 +107,9 @@ func (svc *RedisStudentService) ListStudents() ([]*model.Student, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		for _, key := range keys {
+			std := &model.Student{}
 			std, err := svc.getStudentbykey(key)
 			if err != nil {
 				return nil, err
