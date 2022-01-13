@@ -29,12 +29,47 @@ paths:
                   success:
                     type: boolean
                     example: true
-        400:
-          description: Invalid userid supplied
         404:
-          description:  not found
-        405:
-            description: Invalid input
+          description: 找不到用户
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: no exist
+                  ok:
+                    type: boolean
+                    example: false
+        400:
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example:  Duplicate entry '4' for key 'PRIMARY，cannot unmarshal number into Go struct field Student.name of type string/int
+                  ok:
+                    type: boolean
+                    example: false
+        500:
+            description: 服务器错误
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    ok:
+                      type: boolean
+                    error:
+                      type: string
+                  example:
+                    ok: false
+                    error: service internal error
+
     description: updata_student
     put:
       description: we can update student information.
@@ -63,13 +98,49 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
+                  ok:
                     type: boolean
                     example: true
         404:
-          description: User not found
+          description: 找不到用户
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: no exist
+                  ok:
+                    type: boolean
+                    example: false
         400:
-          description: Invalid ID supplied
+          description: 无效输入
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: cannot unmarshal number into Go struct field Student.name of type string/int
+                  ok:
+                    type: boolean
+                    example: false
+        500:
+          description: 服务器错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  error:
+                    type: string
+                example:
+                  ok: false
+                  error: service internal error
 
 
   '/student/{Id}':
@@ -88,17 +159,38 @@ paths:
             application/json:
               schema:
                 properties:
-                  success:
+                  ok:
                     type: boolean
                     example: true
                   data:
                    $ref: '#/components/schemas/student'
-
-
-        400:
-          description: Invalid userid supplied
+        500:
+          description: 错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  error:
+                    type: string
+                example:
+                  ok: false
+                  error: service internal error
         404:
-          description: User not found
+          description: 找不到学生信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+                    example: null
+                  ok:
+                    type: boolean
+                    example: false
 
     delete:
       description: delete student by id
@@ -116,15 +208,36 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
+                  ok:
                     type: boolean
                     example: true
-
-        400:
-          description: Invalid userid supplied
+        500:
+          description: 服务器错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  error:
+                    type: string
+                example:
+                  ok: false
+                  error: service internal error
         404:
-          description: User not found
-
+          description: fail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: no exist
+                  ok:
+                    type: boolean
+                    example: false
   '/student/list':
     description: Get all student information
     get:
@@ -147,12 +260,36 @@ paths:
                           type: string
                         age:
                           type: integer
-                  success:
+                  ok:
                     type: boolean
                     example: true
         404:
-          description: User not found
-
+          description: 找不到学生信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+                    example: null
+                  ok:
+                    type: boolean
+                    example: false
+        500:
+          description: 错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  error:
+                    type: string
+                example:
+                  ok: false
+                  error: service internal error
 
 components:
   schemas:

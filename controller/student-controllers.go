@@ -44,7 +44,7 @@ func (c *studentcontroller) Studentrouter(r *gin.Engine) {
 
 }
 
-//异步
+//仅在redis保存
 func (c *studentcontroller) Saveredis(ctx *gin.Context) {
 	// 获取传递的参数 转换成 struct
 	var stu *model.Student
@@ -57,7 +57,7 @@ func (c *studentcontroller) Saveredis(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": true})
+	ctx.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
 func (c *studentcontroller) Get(ctx *gin.Context) {
@@ -66,26 +66,35 @@ func (c *studentcontroller) Get(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	var u *model.Student
-	u, err = c.svc_mysql.GetStudent(i)
-	u, err = c.svc_redis.GetStudent(i)
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"data": err.Error()})
 
+	var std *model.Student
+	std, err = c.svc_mysql.GetStudent(i)
+	std, err = c.svc_redis.GetStudent(i)
+	if std == nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"ok": false, "data": nil})
+		return
 	}
-
-	ctx.JSON(http.StatusOK, gin.H{"data": u})
-
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": std})
 }
 func (c *studentcontroller) Getall(ctx *gin.Context) {
 	var std []*model.Student
 	std, err := c.svc_mysql.ListStudents()
 	std, err2 := c.svc_redis.ListStudents()
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"data": err2.Error()})
+	if std == nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"ok": false, "data": nil})
+		return
 	}
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"data": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": err.Error()})
+		return
+	}
+	if err2 != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": err2.Error()})
+		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": std})
 
@@ -94,29 +103,25 @@ func (c *studentcontroller) Update(ctx *gin.Context) {
 	// 获取传递的参数 转换成 struct
 	var stu *model.Student
 	if err := ctx.ShouldBindJSON(&stu); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": err.Error()})
 	}
 	err := c.svc_mysql.UpdateStudent(stu)
-	err2 := c.svc_redis.UpdateStudent(stu)
-	if err2 != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"redis_data": err.Error()})
-		return
-	}
+	err = c.svc_redis.UpdateStudent(stu)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
+		ctx.JSON(http.StatusNotFound, gin.H{"ok": false, "error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": true})
+	ctx.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
 func (c *studentcontroller) Save(ctx *gin.Context) {
 	// 获取传递的参数 转换成 struct
 	var stu *model.Student
 	if err := ctx.ShouldBindJSON(&stu); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"ok": err.Error()})
 	}
 	err := c.svc_mysql.SaveStudent(stu)
-	// 同步
+	// 同时在redis和mysql 保存
 	//err2 := c.svc_redis.SaveStudent(stu)
 	//if err2 != nil {
 	//	ctx.JSON(http.StatusBadRequest, gin.H{"data": err2.Error()})
@@ -124,10 +129,10 @@ func (c *studentcontroller) Save(ctx *gin.Context) {
 	//}
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": true})
+	ctx.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
 func (c *studentcontroller) Delete(ctx *gin.Context) {
@@ -139,12 +144,12 @@ func (c *studentcontroller) Delete(ctx *gin.Context) {
 	err := c.svc_mysql.DeleteStudent(i)
 	err2 = c.svc_redis.DeleteStudent(i)
 	if err2 != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"data": err2.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": err.Error()})
 		return
 	}
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": err.Error()})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"success": true})
+	ctx.JSON(http.StatusOK, gin.H{"ok": true})
 }
