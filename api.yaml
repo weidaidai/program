@@ -1,0 +1,314 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: student information
+  description: Simple Student Information API
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://app.swaggerhub.com/apis/weidaidai/student/1.0.0++
+paths:
+  /student/{type}:
+    parameters:
+      - name: type
+        required: true
+        in: path
+        schema:
+          enum:
+            - mysql
+            - redis
+    post:
+      description: Add student information
+      requestBody:
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/student'
+      responses:
+        200:
+          $ref: '#/components/responses/okResp'
+        400:
+          $ref: '#/components/responses/badRequest'
+        500:
+            description: 服务器错误
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    ok:
+                      type: boolean
+                    error:
+                      type: string
+                  example:
+                    ok: false
+                    error: service internal error
+  /student/{type}/{Id}:
+    parameters:
+      - name: type
+        in: path
+        schema:
+          enum:
+            - mysql
+            - redis
+      - name: Id
+        in: path
+        schema:
+          type: integer
+        required: true
+
+    description: updata_student
+    put:
+      description: we can update student information.
+      parameters:
+        - name: Id
+          in: path
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/studentUpdateCmd'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        404:
+          description: 找不到用户
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResp'
+              example:
+                ok: false
+                error: not exist
+        400:
+          $ref: '#/components/responses/badRequest'
+        500:
+          description: 服务器错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  error:
+                    type: string
+                example:
+                  ok: false
+                  error: service internal error
+    get:
+      description: Get  student information by id
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  data:
+                   $ref: '#/components/schemas/student'
+        500:
+          description: 错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  error:
+                    type: string
+                example:
+                  ok: false
+                  error: service internal error
+        404:
+          description: 找不到学生信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+                    example: null
+                  ok:
+                    type: boolean
+                    example: false
+
+    delete:
+      description: delete student by id
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        500:
+          description: 服务器错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  error:
+                    type: string
+                example:
+                  ok: false
+                  error: service internal error
+        404:
+          description: fail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: no exist
+                  ok:
+                    type: boolean
+                    example: false
+  '/student/{type}/list':
+    parameters:
+      - name: type
+        required: true
+        in: path
+        schema:
+          enum:
+            - mysql
+            - redis
+    description: Get all student information
+    get:
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        age:
+                          type: integer
+                  ok:
+                    type: boolean
+                    example: true
+        404:
+          description: 找不到学生信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+                    example: null
+                  ok:
+                    type: boolean
+                    example: false
+        500:
+          description: 错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  error:
+                    type: string
+                example:
+                  ok: false
+                  error: service internal error
+
+components:
+  responses:
+    okResp:
+      description: ok response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/okResp'
+          example:
+            ok: true
+    badRequest:
+      description: bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResp'
+          example:
+            ok: false
+            error: blah blah blah
+  schemas:
+    student:
+      type: object
+      required:
+        - id
+        - name
+        - age
+      properties:
+        id:
+          type: integer
+          example: 0
+        name:
+          type: string
+          example: 'waidaidai'
+        age:
+          type: integer
+          example: 18
+    studentUpdateCmd:
+      type: object
+      required:
+        - name
+        - age
+      properties:
+        name:
+          type: string
+          example: 'waidaidai'
+        age:
+          type: integer
+          example: 18
+    okResp:
+      type: object
+      properties:
+        ok:
+          type: boolean
+    errorResp:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        error:
+          type: string
+
+

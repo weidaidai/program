@@ -6,10 +6,12 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/go-redis/redis"
 )
 
-func preparerdb(t *testing.T) *redis.Client {
+func prepare(t *testing.T) *redis.Client {
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "127.0.0.1:6379",
@@ -34,7 +36,7 @@ func insert(t *testing.T, rdb *redis.Client, std *model.Student) {
 func Test_redisStudentService_SaveStudent(t *testing.T) {
 
 	t.Run("save not exist", func(t *testing.T) {
-		rdb := preparerdb(t)
+		rdb := prepare(t)
 		defer rdb.Close()
 		defer rdb.FlushAll()
 		s := &model.Student{Id: 12, Name: "xiao", Age: 18}
@@ -49,7 +51,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 	})
 
 	t.Run("save exist", func(t *testing.T) {
-		rdb := preparerdb(t)
+		rdb := prepare(t)
 		defer rdb.FlushAll()
 		s1 := &model.Student{Id: 5, Name: "weidongqi", Age: 22}
 		insert(t, rdb, s1)
@@ -74,7 +76,7 @@ func Test_redisStudentService_SaveStudent(t *testing.T) {
 func Test_redisStudentService_UpdateStudent(t *testing.T) {
 
 	t.Run("update not exist", func(t *testing.T) {
-		rdb := preparerdb(t)
+		rdb := prepare(t)
 		defer rdb.Close()
 		defer rdb.Del()
 		s := &model.Student{
@@ -86,25 +88,25 @@ func Test_redisStudentService_UpdateStudent(t *testing.T) {
 		svc := &redisStudentService{
 			redis: rdb,
 		}
-		if err := svc.UpdateStudent(s); (err != nil) != wantErr {
+		if err := svc.UpdateStudent(77, s); (err != nil) != wantErr {
 			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
 		}
 
 	})
 
-	t.Run("updata exist", func(t *testing.T) {
-		rdb := preparerdb(t)
+	t.Run("update exist", func(t *testing.T) {
+		rdb := prepare(t)
 		defer rdb.Close()
 		defer rdb.FlushAll()
 		s1 := &model.Student{Id: 5, Name: "weidongqi", Age: 22}
 		insert(t, rdb, s1)
-		s := &model.Student{Id: 5, Name: "xiaoming", Age: 18}
+		s := &model.Student{Name: "xiaoming", Age: 18}
 
 		wantErr := false
 		svc := &redisStudentService{
 			redis: rdb,
 		}
-		if err := svc.UpdateStudent(s); (err != nil) != wantErr {
+		if err := svc.UpdateStudent(5, s); (err != nil) != wantErr {
 			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
 		}
 
@@ -113,7 +115,7 @@ func Test_redisStudentService_UpdateStudent(t *testing.T) {
 
 func Test_redisStudentService_DeleteStudent(t *testing.T) {
 	t.Run("del exist", func(t *testing.T) {
-		rdb := preparerdb(t)
+		rdb := prepare(t)
 		defer rdb.Close()
 		defer rdb.FlushAll()
 		s := &model.Student{Id: 1, Name: "xiaoxiaoxing", Age: 22}
@@ -131,7 +133,7 @@ func Test_redisStudentService_DeleteStudent(t *testing.T) {
 func Test_redisStudentService_GetStudent(t *testing.T) {
 
 	t.Run("get exist", func(t *testing.T) {
-		rdb := preparerdb(t)
+		rdb := prepare(t)
 		defer rdb.Close()
 		defer rdb.FlushAll()
 		s := &model.Student{Id: 1, Name: "xiaoxiaoxing", Age: 22}
@@ -152,8 +154,8 @@ func Test_redisStudentService_GetStudent(t *testing.T) {
 }
 
 func Test_redisStudentService_ListStudents(t *testing.T) {
-
-	rdb := preparerdb(t)
+	assert := assert.New(t)
+	rdb := prepare(t)
 	defer rdb.Close()
 	defer rdb.FlushAll()
 	svc := &redisStudentService{
@@ -162,8 +164,10 @@ func Test_redisStudentService_ListStudents(t *testing.T) {
 	//插入数据
 	s1 := &model.Student{Id: 1, Name: "xiaoxing", Age: 22}
 	s2 := &model.Student{Id: 2, Name: "xiaoxing", Age: 33}
+	s3 := &model.Student{Id: 3, Name: "xiaoxing", Age: 33}
 	svc.SaveStudent(s1)
 	svc.SaveStudent(s2)
+	svc.SaveStudent(s3)
 	type args struct {
 		rdb *redis.Client
 	}
@@ -179,6 +183,7 @@ func Test_redisStudentService_ListStudents(t *testing.T) {
 			want: []*model.Student{
 				{Id: 2, Name: "xiaoxing", Age: 33},
 				{Id: 1, Name: "xiaoxing", Age: 22},
+				{Id: 3, Name: "xiaoxing", Age: 33},
 			},
 			wantErr: false,
 		},
@@ -190,9 +195,7 @@ func Test_redisStudentService_ListStudents(t *testing.T) {
 				t.Errorf("listAllStudents() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("listAllStudents() got = %v, want %v", got, tt.want)
-			}
+			assert.Equal(got, tt.want)
 		})
 	}
 }

@@ -17,21 +17,22 @@ func main() {
 		DB:       1,
 		PoolSize: 100,
 	})
-	err := config.Openclient(rdb)
-	if err != nil {
-		return
-	}
-	r := gin.Default()
+
+	defer rdb.Close()
 	db, err := config.OpenDB("root:123456@tcp(127.0.0.1:3306)/sql_test?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
-		return
+		panic(err)
 	}
 	defer db.Close()
-	defer rdb.Close()
-	my_redis := database.NewredisStudentService(rdb)
-	mysql_svc := database.NewMySqlStudentService(db)
-	newstudent := controller.New(mysql_svc, my_redis)
-	newstudent.Studentrouter(r)
+
+	redis := database.NewRedisStudentService(rdb)
+	svcRedis := controller.New(redis)
+	mysql := database.NewMySqlStudentService(db)
+	svcMysql := controller.New(mysql)
+
+	r := gin.Default()
+	svcMysql.StudentRouter(r, "/mysql")
+	svcRedis.StudentRouter(r, "/redis")
 	err = r.Run()
 	if err != nil {
 		panic(err)

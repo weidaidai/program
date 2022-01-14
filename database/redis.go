@@ -12,8 +12,8 @@ type redisStudentService struct {
 	redis *redis.Client
 }
 
-func NewredisStudentService(client *redis.Client) StudentService {
-	return &redisStudentService{client}
+func NewRedisStudentService(client *redis.Client) StudentService {
+	return &redisStudentService{redis: client}
 }
 
 func (svc *redisStudentService) stuExist(key string) bool {
@@ -42,14 +42,14 @@ func (svc *redisStudentService) SaveStudent(std *model.Student) error {
 	return nil
 }
 
-func (svc *redisStudentService) UpdateStudent(std *model.Student) error {
-	key := "std:" + strconv.Itoa(std.Id)
+func (svc *redisStudentService) UpdateStudent(id int, std *model.Student) error {
+	key := "std:" + strconv.Itoa(id)
 	if !svc.stuExist(key) {
 		return errors.New("no exist  ")
 	}
 
 	statusCmd := svc.redis.HMSet(key, map[string]interface{}{
-		"id":   std.Id,
+		"id":   id,
 		"age":  std.Age,
 		"name": std.Name,
 	})
@@ -68,7 +68,7 @@ func (svc *redisStudentService) DeleteStudent(id int) error {
 	}
 	return nil
 }
-func (svc *redisStudentService) getStudentbykey(key string) (*model.Student, error) {
+func (svc *redisStudentService) getStudentKey(key string) (*model.Student, error) {
 
 	val, err := svc.redis.HGetAll(key).Result()
 	if err != nil {
@@ -93,7 +93,7 @@ func (svc *redisStudentService) getStudentbykey(key string) (*model.Student, err
 }
 func (svc *redisStudentService) GetStudent(id int) (*model.Student, error) {
 	key := "std:" + strconv.Itoa(id)
-	return svc.getStudentbykey(key)
+	return svc.getStudentKey(key)
 }
 
 func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
@@ -110,7 +110,7 @@ func (svc *redisStudentService) ListStudents() ([]*model.Student, error) {
 
 		for _, key := range keys {
 			std := &model.Student{}
-			std, err := svc.getStudentbykey(key)
+			std, err := svc.getStudentKey(key)
 			if err != nil {
 				return nil, err
 			}
