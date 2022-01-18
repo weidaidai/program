@@ -46,6 +46,7 @@ paths:
   /student/{type}/{Id}:
     parameters:
       - name: type
+        required: true
         in: path
         schema:
           enum:
@@ -73,15 +74,7 @@ paths:
               $ref: '#/components/schemas/studentUpdateCmd'
       responses:
         200:
-          description: success
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
-                    example: true
+          $ref: '#/components/responses/okResp'
         404:
           description: 找不到用户
           content:
@@ -111,14 +104,11 @@ paths:
       description: Get  student information by id
       responses:
         200:
-          description: success
+          description: ok
           content:
             application/json:
               schema:
                 properties:
-                  ok:
-                    type: boolean
-                    example: true
                   data:
                    $ref: '#/components/schemas/student'
         500:
@@ -128,26 +118,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok:
-                    type: boolean
                   error:
                     type: string
                 example:
                   ok: false
                   error: service internal error
         404:
-          description: 找不到学生信息
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: string
-                    example: null
-                  ok:
-                    type: boolean
-                    example: false
+          $ref: '#/components/responses/badRequest'
 
     delete:
       description: delete student by id

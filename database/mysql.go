@@ -25,9 +25,9 @@ func (svc *mysqlStudentService) SaveStudent(std *model.Student) error {
 
 }
 
-func (svc *mysqlStudentService) UpdateStudent(id int, std *model.Student) error {
+func (svc *mysqlStudentService) UpdateStudent(std *model.Student) error {
 	sqlStr := "UPDATE STUDENT SET NAME=?,AGE=? where ID=?"
-	row, err := svc.db.Exec(sqlStr, &std.Name, &std.Age, id)
+	row, err := svc.db.Exec(sqlStr, &std.Name, &std.Age, &std.Id)
 	if err != nil {
 		return err
 	}

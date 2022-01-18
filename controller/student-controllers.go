@@ -52,27 +52,27 @@ func (c *studentControllerImpl) Get(ctx *gin.Context) {
 	var std *model.Student
 	std, err = c.svc.GetStudent(i)
 	if std == nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"ok": false, "data": nil})
+		ctx.JSON(http.StatusNotFound, gin.H{"data": std})
 		return
 	}
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"ok": true, "data": std})
 }
 func (c *studentControllerImpl) GetAll(ctx *gin.Context) {
-	var std []*model.Student
-	std, err := c.svc.ListStudents()
-	if std == nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"ok": false, "data": nil})
+	var stds []*model.Student
+	stds, err := c.svc.ListStudents()
+	if stds == nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"data": stds})
 		return
 	}
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"ok": true, "data": std})
+	ctx.JSON(http.StatusOK, gin.H{"ok": true, "data": stds})
 
 }
 func (c *studentControllerImpl) Update(ctx *gin.Context) {
@@ -82,14 +82,13 @@ func (c *studentControllerImpl) Update(ctx *gin.Context) {
 	if err2 != nil {
 		return
 	}
-
-	var stu *model.Student
-
-	if err := ctx.ShouldBindJSON(&stu); err != nil {
+	stu := &model.Student{}
+	stu.Id = i
+	if err := ctx.ShouldBindJSON(stu); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": err.Error()})
 	}
 
-	err := c.svc.UpdateStudent(i, stu)
+	err := c.svc.UpdateStudent(stu)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"ok": false, "error": err.Error()})
 		return
@@ -99,7 +98,7 @@ func (c *studentControllerImpl) Update(ctx *gin.Context) {
 
 func (c *studentControllerImpl) Save(ctx *gin.Context) {
 	// 获取传递的参数 转换成 struct
-	var stu *model.Student
+	stu := &model.Student{}
 	if err := ctx.ShouldBindJSON(&stu); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"ok": err.Error()})
 	}

@@ -42,14 +42,14 @@ func (svc *redisStudentService) SaveStudent(std *model.Student) error {
 	return nil
 }
 
-func (svc *redisStudentService) UpdateStudent(id int, std *model.Student) error {
-	key := "std:" + strconv.Itoa(id)
+func (svc *redisStudentService) UpdateStudent(std *model.Student) error {
+	key := "std:" + strconv.Itoa(std.Id)
 	if !svc.stuExist(key) {
 		return errors.New("no exist  ")
 	}
 
 	statusCmd := svc.redis.HMSet(key, map[string]interface{}{
-		"id":   id,
+		"id":   std.Id,
 		"age":  std.Age,
 		"name": std.Name,
 	})

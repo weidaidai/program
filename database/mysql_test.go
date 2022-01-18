@@ -187,7 +187,7 @@ func TestMysqlStudentService_UpdateStudent(t *testing.T) {
 			Age:  22,
 		}
 		wantErr := true
-		if err := svc.UpdateStudent(8, s); (err != nil) != wantErr {
+		if err := svc.UpdateStudent(s); (err != nil) != wantErr {
 			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
 		}
 
@@ -217,7 +217,7 @@ func TestMysqlStudentService_UpdateStudent(t *testing.T) {
 			Age:  33,
 		}
 		wantErr := false
-		if err := svc.UpdateStudent(1, s); (err != nil) != wantErr {
+		if err := svc.UpdateStudent(s); (err != nil) != wantErr {
 			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
 		}
 		s2, err2 := svc.GetStudent(1)

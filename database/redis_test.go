@@ -88,7 +88,7 @@ func Test_redisStudentService_UpdateStudent(t *testing.T) {
 		svc := &redisStudentService{
 			redis: rdb,
 		}
-		if err := svc.UpdateStudent(77, s); (err != nil) != wantErr {
+		if err := svc.UpdateStudent(s); (err != nil) != wantErr {
 			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
 		}
 
@@ -100,13 +100,13 @@ func Test_redisStudentService_UpdateStudent(t *testing.T) {
 		defer rdb.FlushAll()
 		s1 := &model.Student{Id: 5, Name: "weidongqi", Age: 22}
 		insert(t, rdb, s1)
-		s := &model.Student{Name: "xiaoming", Age: 18}
+		s := &model.Student{Id: 5, Name: "xiaoming", Age: 18}
 
 		wantErr := false
 		svc := &redisStudentService{
 			redis: rdb,
 		}
-		if err := svc.UpdateStudent(5, s); (err != nil) != wantErr {
+		if err := svc.UpdateStudent(s); (err != nil) != wantErr {
 			t.Errorf("saveStudent() error = %v, wantErr %v", err, wantErr)
 		}
 
@@ -195,7 +195,7 @@ func Test_redisStudentService_ListStudents(t *testing.T) {
 				t.Errorf("listAllStudents() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			assert.Equal(got, tt.want)
+			assert.ElementsMatch(got, tt.want)
 		})
 	}
 }
