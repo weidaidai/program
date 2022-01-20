@@ -52,7 +52,7 @@ func (c *studentControllerImpl) Get(ctx *gin.Context) {
 	var std *model.Student
 	std, err = c.svc.GetStudent(i)
 	if std == nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"data": std})
+		ctx.JSON(http.StatusNotFound, gin.H{"data": "null"})
 		return
 	}
 	if err != nil {
@@ -99,7 +99,7 @@ func (c *studentControllerImpl) Update(ctx *gin.Context) {
 func (c *studentControllerImpl) Save(ctx *gin.Context) {
 	// 获取传递的参数 转换成 struct
 	stu := &model.Student{}
-	if err := ctx.ShouldBindJSON(&stu); err != nil {
+	if err := ctx.ShouldBindJSON(stu); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"ok": err.Error()})
 	}
 	err := c.svc.SaveStudent(stu)

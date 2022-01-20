@@ -2,31 +2,99 @@ package controller
 
 import (
 	"net/http"
-	"net/http/httptest"
+	"program/model"
 	"testing"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gavv/httpexpect/v2"
 )
 
-func TestStudentController_Get(t *testing.T) {
+var testUrl string = "http://127.0.0.1:8080"
 
-	c := &studentControllerImpl{}
-	//切换到test模式
-	gin.SetMode(gin.TestMode)
-	//设置和注册路由
-	r := gin.Default()
-	r.GET("/mysql/list", c.GetAll)
-	//测试的模拟请求
-	req, err := http.NewRequest(http.MethodGet, "/mysql/list", nil)
-	if err != nil {
-		t.Fatalf("Couldn't create request: %v\n", err)
+func TestStudentController_Postok(t *testing.T) {
+	e := httpexpect.New(t, testUrl) //创建一个httpexpect实例
+	//stu := &model.Student{Id: 18, Name: "555", Age: 18}
+	postData := map[string]interface{}{ //创建一个json变量
+		"id":   18,
+		"name": "555",
+		"age":  18,
 	}
-	// 创造响应路由
-	w := httptest.NewRecorder()
-	// 执行请求
-	r.ServeHTTP(w, req)
+	contentType := "application/json;charset=utf-8"
 
-	if w.Code != http.StatusOK {
-		t.Fatalf("Expected to get status %d but instead got %d\n", http.StatusOK, w.Code)
+	e.POST("/student/mysql/"). //post 请求
+					WithHeader("ContentType", contentType). //定义头信息
+					WithJSON(postData).                     //传入json body
+					Expect().
+					Status(http.StatusOK). //判断请求是否200
+					JSON().
+					Object().              //json body实例化
+					ContainsKey("ok").     //检验是否包括key
+					ValueEqual("ok", true) //对比key的value
+
+}
+
+func TestStudentController_GetOk(t *testing.T) {
+	stu := &model.Student{Id: 18, Name: "555", Age: 18}
+	e := httpexpect.New(t, testUrl) //创建一个httpExpect实例
+	e.GET("/student/mysql/18").     //get请求
+					Expect().
+					Status(http.StatusOK). //判断请求是否200
+					JSON().
+					Object().               //json body实例化
+					ContainsKey("data").    //检验是否包括key
+					ValueEqual("data", stu) //对比key的value
+
+}
+func TestStudentController_GetFail(t *testing.T) {
+	e := httpexpect.New(t, testUrl) //创建一个httpExpect实例
+	e.GET("/student/mysql/88").     //ge请求
+					Expect().
+					Status(http.StatusNotFound). //判断请求是否404
+					JSON().
+					Object().                  //json body实例化
+					ContainsKey("data").       //检验是否包括key
+					ValueEqual("data", "null") //对比key的value
+}
+
+func TestStudentController_Putok(t *testing.T) {
+
+	e := httpexpect.New(t, testUrl) //创建一个httpexpect实例
+	//stu := &model.Student{Id: 18, Name: "555", Age: 18}
+	postData := map[string]interface{}{ //创建一个json变量
+		"name": "xiao",
+		"age":  88,
 	}
+	contentType := "application/json;charset=utf-8"
+
+	e.PUT("/student/mysql/18"). //put 请求
+					WithHeader("ContentType", contentType). //定义头信息
+					WithJSON(postData).                     //传入json body
+					Expect().
+					Status(http.StatusOK). //判断请求是否200
+					JSON().
+					Object().              //json body实例化
+					ContainsKey("ok").     //检验是否包括key
+					ValueEqual("ok", true) //对比key的value
+
+}
+
+func TestStudentController_GetList(t *testing.T) {
+	want := []*model.Student{{Id: 18, Name: "xiao", Age: 88}}
+	e := httpexpect.New(t, testUrl) //创建一个httpExpect实例
+	e.GET("/student/mysql/list").   //get请求
+					Expect().
+					Status(http.StatusOK). //判断请求是否200
+					JSON().
+					Object().                //json body实例化
+					ContainsKey("data").     //检验是否包括key
+					ValueEqual("data", want) //对比key的value
+}
+func TestStudentController_deleteOk(t *testing.T) {
+	e := httpexpect.New(t, testUrl) //创建一个httpExpect实例
+	e.DELETE("/student/mysql/18").  //ge请求
+					Expect().
+					Status(http.StatusOK). //判断请求是否200
+					JSON().
+					Object().              //json body实例化
+					ContainsKey("ok").     //检验是否包括key
+					ValueEqual("ok", true) //对比key的value
 }
