@@ -1,9 +1,11 @@
 package main
 
 import (
+	"os"
 	"program/config"
 	"program/controller"
 	"program/database"
+	"strconv"
 
 	"github.com/go-redis/redis"
 
@@ -11,21 +13,21 @@ import (
 )
 
 func main() {
-	//dns=root:123456@tcp(127.0.0.1:3306)/sql_test?charset=utf8&parseTime=True&loc=Local
+	//dns=root:123456@tcp(127.0.0.1:33306)/sql_test?charset=utf8&parseTime=True&loc=Local
 
-	//MysqlDNS := os.Getenv("MYSQL_DSN")
-	//RedisAddr := os.Getenv("REDIS_ADDR")
-	//RedisPoolsize, err := strconv.Atoi(os.Getenv("REDIS_POOL_SIZE"))
-	//if err != nil {
-	//	return
-	//}
+	MysqlDNS := os.Getenv("MYSQL_DNS")
+	RedisAddr := os.Getenv("REDIS_ADDR")
+	RedisPoolsize, err := strconv.Atoi(os.Getenv("REDIS_POOL_SIZE"))
+	if err != nil {
+		return
+	}
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		PoolSize: 100,
+		Addr:     RedisAddr,
+		PoolSize: RedisPoolsize,
 	})
 
 	defer rdb.Close()
-	db, err := config.OpenDB("root:Aa123456@tcp(127.0.0.1:3306)/sql_test?charset=utf8&parseTime=True&loc=Local")
+	db, err := config.OpenDB(MysqlDNS)
 	if err != nil {
 		panic(err)
 	}
