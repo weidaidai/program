@@ -17,6 +17,7 @@ func main() {
 
 	MysqlDNS := os.Getenv("MYSQL_DNS")
 	RedisAddr := os.Getenv("REDIS_ADDR")
+	Redis_Passworld := os.Getenv("REDIS_PASSWORD")
 	RedisPoolsize, err := strconv.Atoi(os.Getenv("REDIS_POOL_SIZE"))
 	if err != nil {
 		return
@@ -24,6 +25,7 @@ func main() {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     RedisAddr,
 		PoolSize: RedisPoolsize,
+		Password: Redis_Passworld,
 	})
 
 	defer rdb.Close()
