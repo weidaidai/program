@@ -13,7 +13,7 @@ COPY --from=0  /student/program .
 
 EXPOSE 8080
 
-ENTRYPOINT "home/app/program"
+ENTRYPOINT home/app/program
 
 
 
