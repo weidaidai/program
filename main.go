@@ -20,7 +20,7 @@ func main() {
 	Redis_Passworld := os.Getenv("REDIS_PASSWORD")
 	RedisPoolsize, err := strconv.Atoi(os.Getenv("REDIS_POOL_SIZE"))
 	if err != nil {
-		return
+		panic(err)
 	}
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     RedisAddr,
